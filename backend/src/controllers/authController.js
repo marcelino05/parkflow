@@ -51,8 +51,8 @@ export const registrar = async (req, res, next) => {
     if (!/^[A-Za-zÀ-ÿ\s]+$/.test(nome)) {
       return erroResposta(res, 400, "Nome inválido. Use apenas letras e espaços.");
     }
-    if (nome.length < 3 || nome.length > 50) {
-      return erroResposta(res, 400, "Nome deve ter entre 3 e 50 caracteres.");
+    if (nome.length < 2 || nome.length > 50) {
+      return erroResposta(res, 400, "Nome deve ter entre 2 e 50 caracteres.");
     }
 
     // Validação do telefone
@@ -156,4 +156,3 @@ export const login = async (req, res, next) => {
     next(erro);
   }
 };
-

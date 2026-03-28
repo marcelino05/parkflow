@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParkFlow</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+  
+  <!-- HEADER / NAVBAR -->
+  <header class="navbar">
+    <div class="container">
+      
+      <div class="top-bar">
+        <h1 class="logo">Park<b style="color: #16A34A;">Flow</b></h1>
+        
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+      
+      <nav class="nav-links" id="nav-links">
+        <a href="#features">
+          <i class="bi bi-grid-fill"></i> Funcionalidades
+        </a>
+        <a href="#plans">
+          <i class="bi bi-credit-card-2-front-fill"></i> Planos
+        </a>
+        <a href="#contact">
+          <i class="bi bi-telephone-fill"></i> Contato
+        </a>
+        <a href="#" id="toggle-theme">
+          <i class="bi bi-sun-fill"></i><span> Modo Claro</span>
+        </a>
+        <a href="./src/auth/auth.html" class="btn-navbar">
+          <i class="bi bi-person-plus-fill"></i> Criar conta
+        </a>
+      </nav>
+      
+    </div>
+  </header>
+  
+  <!-- HERO / BANNER PRINCIPAL -->
+  <main>
+    <section class="hero">
+      <div class="hero-content container">
+        
+        <h2>Controle total do seu estacionamento</h2>
+        
+        <p id="typing"></p>
+        
+        <div class="hero-btns">
+          <a href="./src/auth/auth.html" class="btn-primary">Começar agora Grátis</a>
+          <a class="btn-secundary">Ver Demostração
+          </a>
+        </div>
+        
+        <div class="hero-feature">
+          <p><i class="bi bi-check-lg"></i> Controle de vagas em tempo real</p>
+          <p><i class="bi bi-check-lg"></i> Registo automático de entradas</p>
+          <p><i class="bi bi-check-lg"></i> Gestão completa de operadores</p>
+        </div>
+      </div><!-- fim hero-contain -->
+      
+      <div class="hero-view">
+        <img src="./src/utils/img/parkflow.png" />
+      </div>
+    </section>
+    
+    <!-- FUNCIONALIDADES -->
+    <section class="features" id="features">
+      <div class="container">
+        
+        <h2>
+          Controle e otimize o seu estacionamento com o ParkFlow
+        </h2>
+        
+        <p class="sub">
+          Explore os principais recursos que permitem gerir vagas, acompanhar movimentações e controlar receitas de forma simples.
+        </p>
+        
+        <div class="cards">
+          <article class="card fade" style="border: 1px solid #16A34A;">
+            
+            <h3 style="color: #16A34A;">
+              Nunca mais perca o controle das vagas
+            </h3>
+            
+            <p>
+              Veja em tempo real quantas vagas estão disponíveis e evite confusão no seu parque.
+            </p>
+            
+          </article>
+          <article class="card fade" style="border: 1px solid #2563EB; ">
+            
+            <h3 style="color: #2563EB;">
+              Evite perdas de dinheiro
+            </h3>
+            
+            <p>
+              O sistema calcula automaticamente quanto cada carro deve pagar.
+            </p>
+            
+          </article>
+          <article class="card fade" style="border: 1px solid #F59E0B;">
+            
+            <h3 style="color: #F59E0B;">
+              Registre tudo automaticamente
+            </h3>
+            
+            <p>
+              Entradas, saídas e valores ficam salvos sem precisar de caderno.
+            </p>
+            
+          </article>
+          
+          <article class="card fade" style="border: 1px solid #DC2626;">
+            
+            <h3 style="color: #DC2626;">
+              Controle seus funcionários
+            </h3>
+            
+            <p>
+              Saiba quem registrou cada carro e evite erros ou fraudes.
+            </p>
+            
+          </article>
+        </div>
+      </div>
+    </section>
+    
+    <!-- PLANOS -->
+    <section class="plans" id="plans">
+      <div class="container">
+        
+        <h2>
+          Escolha o plano ideal para seu estacionamento
+        </h2>
+        
+        <p class="sub">
+          Comece grátis e evolua conforme o seu negócio cresce
+        </p>
+        
+        <div class="plans-container">
+          
+          
+          <!-- TRIAL -->
+          <div class="plan">
+            <h3>Trial</h3>
+            
+            <p class="preco">Grátis/7 dias</p>
+            
+            <ul>
+              <li><i class="bi bi-check2"></i> 1 estacionamento</li>
+              <li><i class="bi bi-check2"></i> até 20 vagas</li>
+              <li><i class="bi bi-check2"></i> 1 operador</li>
+              <li><i class="bi bi-check2"></i> Controle básico de entradas e saídas</li>
+              <li><i class="bi bi-check2"></i> Cálculo automático simples</li>
+            </ul>
+          </div>
+          
+          <!-- BASICO -->
+          <div class="plan destaque">
+            <span class="tag">Mais usado</span>
+            
+            <h3>Básico</h3>
+            
+            <p class="preco">Sob observação MZN/mês</p>
+            
+            <ul>
+              <li><i class="bi bi-check2"></i> até 2 estacionamentos</li>
+              <li><i class="bi bi-check2"></i> até 50 vagas</li>
+              <li><i class="bi bi-check2"></i> até 3 operadores</li>
+              <li><i class="bi bi-check2"></i> Controle completo de entradas e saídas</li>
+              <li><i class="bi bi-check2"></i> Cálculo automático por hora</li>
+              <li><i class="bi bi-check2"></i> Histórico completo</li>
+              <li><i class="bi bi-check2"></i> Controle de faturamento diário</li>
+            </ul>
+          </div>
+          
+          <!-- PRO -->
+          <div class="plan pro">
+            
+            <h3>Pro</h3>
+            <p class="preco">Sob observação MZN/mês</p>
+            
+            <ul>
+              <li><i class="bi bi-check2"></i> Estacionamentos ilimitados</li>
+              <li><i class="bi bi-check2"></i> Vagas ilimitadas</li>
+              <li><i class="bi bi-check2"></i> Operadores ilimitados</li>
+              <li><i class="bi bi-check2"></i> Relatórios avançados</li>
+              <li><i class="bi bi-check2"></i> Histórico completo sem limite</li>
+              <li><i class="bi bi-check2"></i> Melhor controle da equipe</li>
+              <li><i class="bi bi-check2"></i> Suporte prioritário</li>
+            </ul>
+            
+            <p class="descricao-pro">
+              Ideal para grandes parques e empresas
+            </p>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- FOOTER -->
+  <footer class="footer">
+    
+    <div class="footer-container">
+      
+      <!-- LOGO / SOBRE -->
+      <div class="footer-col">
+        <h2 class="logo">Park<b style="color: #16A34A;">Flow</b></h2>
+        
+        <p style="margin-bottom: 40px;">
+          Sistema de gestão de estacionamentos em Moçambique.
+          Controle vagas, faturamento e operações com simplicidade.
+        </p>
+        
+        <a href="./src/auth/auth.html" class="btn-primary">Começar agora</a>
+      </div>
+      
+      <!-- LINKS -->
+      <div class="footer-col">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="#features">Funcionalidades</a>
+          </li>
+          <li><a href="#plans">Planos</a>
+          </li>
+          <li><a href="#contact">Contato</a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- SUPORTE -->
+      <div class="footer-col">
+        <h3>Suporte</h3>
+        <ul>
+          <li><a href="#">Ajuda</a></li>
+          <li><a href="#">Termos</a></li>
+          <li><a href="#">Privacidade</a></li>
+        </ul>
+      </div>
+      
+      <!-- CONTATO -->
+      <div class="footer-col" id="contact">
+        <h3>Contato</h3>
+        <p>+258 83 368 6774</p>
+        <p>parkflowsuporte@gmail.com</p>
+      </div>
+      
+    </div>
+    
+    <!-- LINHA FINAL -->
+    <div class="footer-bottom">
+      <p>© 2026 ParkFlow. Todos os direitos reservados.</p>
+    </div>
+    
+  </footer>
+</body>
+<script type="module" src="./config.js"></script>
+
+</html>

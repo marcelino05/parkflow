@@ -11,9 +11,10 @@ import {
 import {
   verificarAdmin
 } from "../middlewares/roleMiddleware.js";
+import verifyPlan from "../middlewares/verifyPlan.js";
 
 const router = express.Router();
 
-router.post("/operador", verificarToken, verificarEmpresa, verificarAdmin, criarOperador);
+router.post("/operador", verificarToken, verificarEmpresa, verifyPlan, verificarAdmin, criarOperador);
 
 export default router;

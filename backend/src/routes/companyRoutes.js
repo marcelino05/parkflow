@@ -3,7 +3,8 @@ import {
   criarEmpresa,
   buscarEmpresa,
   atualizarEmpresa,
-  statusEmpresa
+  statusEmpresa,
+  usoEmpresa
 } from "../controllers/companyController.js"
 import {
   verificarToken
@@ -14,6 +15,9 @@ import {
 import {
   permitir
 } from "../middlewares/roleMiddleware.js";
+import verifyPlan from "../middlewares/verifyPlan.js";
+
+
 
 const router = express.Router()
 router.use(verificarToken)
@@ -25,5 +29,8 @@ router.get("/status", verificarEmpresa, statusEmpresa)
 // só admin
 router.put("/", permitir("admin"), atualizarEmpresa);
 router.get("/", permitir("admin"), buscarEmpresa);
+
+router.get("/uso", verificarToken, verificarEmpresa, verifyPlan, usoEmpresa
+);
 
 export default router;

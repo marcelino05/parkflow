@@ -17,34 +17,50 @@ const empresaSchema = new mongoose.Schema({
     type: String,
     default: "Não definido"
     },
+
     proprietarioId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
     },
+
     plano: {
       type: String,
       enum: ["trial", "basico", "pro"],
     default: "trial"
     },
+
     status: {
       type: String,
       enum: ["ativo", "suspenso"],
     default: "ativo"
     },
-    trialInicio: {
-      type: Date
-    },
-    trialFim: {
-      type: Date
-    },
+
+    trialInicio: Date,
+    trialFim: Date,
+
     planoAtivo: {
       type: Boolean,
     default: true
     },
-    dataExpiracaoPlano: {
-      type: Date
+
+    dataExpiracaoPlano: Date,
+
+    limites: {
+      maxEstacionamentos: {
+        type: Number,
+      default: 1
+      },
+      maxVagas: {
+        type: Number,
+      default: 20
+      },
+      maxOperadores: {
+        type: Number,
+      default: 1
+      }
     },
+
     criadoEm: {
       type: Date,
     default: Date.now

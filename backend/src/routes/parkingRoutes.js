@@ -14,10 +14,11 @@ import {
 import {
   permitir
 } from "../middlewares/roleMiddleware.js";
+import verifyPlan from "../middlewares/verifyPlan.js";
 
 const router = express.Router()
 
-router.use(verificarToken, verificarEmpresa)
+router.use(verificarToken, verificarEmpresa, verifyPlan)
 
 router.post("/", permitir("admin"), criarEstacionamento);
 router.put("/:id", permitir("admin"), atualizarEstacionamento);

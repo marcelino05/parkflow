@@ -1,0 +1,227 @@
+  import { createToast, updateToast, removeToast } from "../utils/toast.js"
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    const formRegister = document.getElementById("formRegister")
+    const formLogin = document.getElementById("form-login")
+    
+    if (formRegister) {
+      formRegister.addEventListener("submit", e => {
+        e.preventDefault()
+        register()
+      })
+    }
+    
+    if (formLogin) {
+      formLogin.addEventListener("submit", e => {
+        e.preventDefault()
+        login()
+      })
+    }
+  })
+  
+  
+  //REGISTRAR USUÁRIO   
+  const register = async () => {
+    //PEGAR CAMPOS
+    const message = document.getElementById("register-msg")
+    const name = document.getElementById("nameRegister").value.toLowerCase().trim()
+    const phone = document.getElementById("telephone").value.trim()
+    const email = document.getElementById("emailRegister").value.toLowerCase().trim()
+    const password = document.getElementById("passwordRegister").value.trim()
+    
+    message.innerHTML = ""
+    
+    const error =
+      validateName(name) ||
+      validatePhone(phone) ||
+      validateEmail(email) ||
+      validatePassword(password)
+    
+    if (error) {
+      createToast(error, "erro")
+      return
+    }
+    
+    const newUser = {
+      nome: name,
+      telefone: phone,
+      email: email,
+      senha: password
+    };
+    
+    const toast = createToast("A processar...", "info")
+    
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/registrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newUser)
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao cadastrar")
+      }
+      
+      
+      
+      updateToast(toast, "Cadastrado com sucesso", "sucesso")
+      // dentro do register() depois de cadastro com sucesso
+      const container = document.querySelector("main.container");
+      const loginBox = document.querySelector(".form-box.login");
+      const registerBox = document.querySelector(".form-box.register");
+      
+      // primeiro garante que login está visível para animação
+      loginBox.style.visibility = "visible";
+      registerBox.style.visibility = "hidden";
+      
+      // depois dispara a animação de deslizar
+      setTimeout(() => {
+        container.classList.add("active");
+      }, 50); // um pequeno delay permite que o browser registre a mudança de visibility
+      
+      clearfields("formRegister")
+      
+    } catch (error) {
+      updateToast(toast, error.message, "erro")
+      
+    }
+    
+    removeToast(toast)
+    
+  }
+  
+  // LOGIN
+  const login = async () => {
+    const email = document.getElementById("emailLogin").value.toLowerCase().trim()
+    const password = document.getElementById("passwordLogin").value.trim()
+    const message = document.getElementById("login-msg")
+    
+    message.innerHTML = ""
+    
+    const error =
+      validateEmail(email) || validatePassword(password)
+    
+    if (error) {
+      createToast(error, "erro")
+      return
+    }
+    
+    const user = {
+      email,
+      senha: password
+    };
+    
+    const toast = createToast("A processar...", "info")
+    
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+      })
+      
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.message || "Erro ao fazer login")
+      }
+      
+      // ✅ SUCESSO
+      updateToast(toast, "Login realizado com sucesso!", "sucesso")
+      clearfields("form-login")
+      
+      //  guardar token
+      if (!data.token) return
+      
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        // opcional: mostrar mensagem de sucesso aqui
+        setTimeout(() => {
+          window.location.href = "../empresa/empresa.html";
+        }, 1500);
+      } else {
+        console.error("Token não recebido");
+      }
+    } catch (error) {
+      updateToast(toast, error.message, "erro")
+      
+    }
+    
+    removeToast(toast)
+    
+  }
+  //VALIDAÇÃO REGISTER
+  const validateEmail = (email) => {
+    if (!email) return "Email obrigatório"
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) return "Email inválido"
+    
+    return null
+    
+  }
+  
+  //Validar Nome
+  const validateName = (name) => {
+    if (typeof name !== "string") return "Nome inválido"
+    
+    name = name.trim()
+    
+    if (!name) return "Nome obrigatório"
+    if (name.length < 2) return "Nome deve ter no mínimo 2 caracteres"
+    if (name.length > 50) return "Nome excede o limite de 50 caracteres"
+    
+    return null
+  }
+  
+  //VALIDAR PASSWORD
+  const validatePassword = (password) => {
+    if (typeof password !== "string") return "Senha inválida"
+    
+    password = password.trim()
+    
+    if (!password) return "Senha obrigatória"
+    if (password.length < 6) return "Senha muito curta"
+    if (password.length > 30) return "Senha muito longa"
+    
+    // opcional (nível avançado)
+    const regex = /^(?=.*[A-Za-z])(?=.*\d).+$/
+    if (!regex.test(password)) {
+      return "Senha deve conter letras e números"
+    }
+    
+    return null
+  }
+  
+  //VALIDAR TELEFONE
+  const validatePhone = (phone) => {
+    if (typeof phone !== "string") return "Telefone inválido"
+    
+    phone = phone.trim()
+    
+    if (!phone) return "Telefone obrigatório"
+    
+    let phoneFormatado = phone
+    
+    if (phoneFormatado.startsWith("+258")) {
+      phoneFormatado = phoneFormatado.slice(4)
+    } else if (phoneFormatado.startsWith("258")) {
+      phoneFormatado = phoneFormatado.slice(3)
+    }
+    
+    const regex = /^(82|83|84|85|86|87)\d{7}$/
+    
+    if (!regex.test(phoneFormatado)) return "Telefone inválido"
+    
+    return null
+  }
+  
+  const clearfields = (formId) => {
+    const form = document.getElementById(formId)
+    if (form) form.reset()
+  }

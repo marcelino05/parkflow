@@ -1,0 +1,86 @@
+:root {
+  /* BORDAS (vivas) */
+  --cor-info: #60A5FA;
+  --cor-sucesso: #4ADE80;
+  --cor-alerta: #FBBF24;
+  --cor-erro: #FF3333;
+  
+  /* BACKGROUND (escuro suficiente para texto branco) */
+  --cor-info-bg: rgba(37, 99, 235, 0.65);
+  --cor-sucesso-bg: rgba(22, 163, 74, 0.65);
+  --cor-alerta-bg: rgba(245, 158, 11, 0.65);
+  --cor-erro-bg: rgba(220, 38, 38, 0.65);
+}
+
+.toast-container {
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  top: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  z-index: 999;
+  
+}
+
+
+.toast {
+  padding: 12px 24px;
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.4);
+  min-width: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateX(100%);
+  animation: slideIn 0.3s ease forwards;
+  
+}
+
+/*TIPOS DE TOAST*/
+.toast.sucesso {
+  border-left: 6px solid var(--cor-sucesso);
+  background: var(--cor-sucesso-bg);
+  
+}
+
+.toast.info {
+  border-left: 6px solid var(--cor-info);
+  background: var(--cor-info-bg);
+  
+}
+
+.toast.alert {
+  border-left: 6px solid var(--cor-alerta);
+  background: var(--cor-alerta-bg);
+  
+}
+
+.toast.erro {
+  border-left: 6px solid var(--cor-erro);
+  background: var(--cor-erro-bg);
+  
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ANIMAÇÃO DE SAÍDA (opcional se quiser usar depois) */
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}

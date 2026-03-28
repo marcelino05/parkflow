@@ -1,0 +1,459 @@
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial;
+    
+    list-style: none;
+    text-decoration: none;
+    outline: none;
+    
+  }
+
+  :root {
+    --cor-primaria: #2563EB;
+    --cor-primaria-hover: #1d4ed8;
+    --cor-sucesso: #16A34A;
+    --cor-alerta: #F59E0B;
+    --cor-erro: #DC2626;
+    
+    --fundo: #f4f4f4;
+    --card: #FFFFFF;
+    --texto: #0F172A;
+    --borda: #E2E8F0;
+    
+  }
+  
+  .dark {
+    --fundo: #0F172A;
+    --card: #1E293B;
+    --texto: #F1F5F9;
+    --borda: #334155;
+    
+  }
+  
+  /*PARKFLOW BODY*/
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(90deg, var(--borda), var(--fundo));
+    font-size: 1em;
+  }
+  
+  
+  main.container {
+    position: relative;
+    background: var(--card);
+    width: 850px;
+    height: 550px;
+    margin: 20px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgb(0, 0, 0, 0.05);
+    overflow: hidden;
+    
+  }
+  
+  main.container h1 {
+    font-size: 2.2em;
+    margin: -10px 0;
+    
+  }
+  
+  main.container p {
+    font-size: .94em;
+    margin: 15px 0;
+    
+  }
+  
+  form {
+    width: 100%;
+    
+  }
+  
+  section.form-box {
+    position: absolute;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--texto);
+    padding: 40px;
+    z-index: 1;
+    transition: .6s ease-in-out 1.2s;
+    visibility: 0s 1s;
+    
+  }
+  
+  .container.active .form-box {
+    right: 50%;
+    
+  }
+  
+  .form-box.register {
+    visibility: hidden;
+    
+  }
+  
+  .container.active .form-box.register {
+    visibility: visible;
+    
+  }
+  
+  div.input.box {
+    position: relative;
+    margin: 30px 0;
+    
+  }
+  
+  div.input.box input {
+    width: 100%;
+    padding: 13px 50px 13px 20px;
+    background: var(--borda);
+    border-radius: 8px;
+    font-size: 1em;
+    border: none;
+    color: var(--texto);
+    font-weight: 500;
+    
+  }
+  
+  .input.box input::placeholder {
+    font-weight: 400;
+    
+  }
+  
+  .input.box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    
+  }
+  
+  .input-group i {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+  }
+  
+  .forgot-link {
+    margin: -12px 0 15px;
+    
+  }
+  
+  .forgot-link a {
+    font-size: .93em;
+    color: var(--texto);
+    
+  }
+  
+  .forgot-link i {
+    font-size: .92em;
+    
+  }
+  
+  .forgot-link a:hover {
+    color: var(--cor-primaria-hover);
+    text-decoration: underline;
+  }
+  
+  .btn {
+    width: 100%;
+    height: 46px;
+    background: var(--cor-primaria);
+    border-radius: 8px;
+    box-sizing: 0 0 10px rgb(0, 0, 0, 0.2);
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: 1em;
+    font-weight: 400;
+    
+  }
+  
+  .btn:hover {
+    background: var(--cor-primaria-hover);
+  }
+  
+  section.toggle-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    
+  }
+  
+  .toggle-box::before {
+    content: '';
+    position: absolute;
+    left: -250%;
+    width: 300%;
+    height: 100%;
+    border-radius: 150px;
+    background: var(--cor-primaria);
+    z-index: 2;
+    transition: 1.8s ease-in-out;
+    
+  }
+  
+  .container.active .toggle-box::before {
+    left: 50%;
+    
+  }
+  
+  .toggle-panel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: .6s ease-in-out;
+    
+  }
+  
+  .toggle-panel.toggle-left {
+    left: 0;
+    transition-delay: 1.2s;
+    
+  }
+  
+  .container.active .toggle-panel.toggle-left {
+    left: -50%;
+    transition-delay: .6s;
+    
+  }
+  
+  .toggle-panel.toggle-right {
+    right: -50%;
+    transition-delay: 1.2s;
+    
+  }
+  
+  .container.active .toggle-panel.toggle-right {
+    right: 0;
+    transition-delay: 1.2s;
+    
+  }
+  
+  .toggle-panel p {
+    margin-bottom: 20px;
+    
+  }
+  
+  .toggle-panel h1 {
+    text-align: center;
+    
+  }
+  
+  .toggle-panel .btn {
+    width: 160px;
+    height: 46px;
+    background: transparent;
+    border: 1px solid #fff;
+    box-shadow: none;
+    position: relative;
+  }
+  
+  .toggle-panel .btn:hover::before {
+    width: 100%;
+  }
+  
+  .toggle-panel .btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #237DF3;
+    transition: 0.3s;
+    z-index: -1;
+    
+  }
+  
+  #register-msg,
+  #login-msg {
+    font-size: 1.2em;
+  }
+  
+  /*Mobile*/
+  @media (max-width: 768px) {
+    
+    body {
+      padding: 0px;
+      align-items: flex-start;
+      
+    }
+    
+    main.container {
+      width: 100%;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0 0 20px 20px;
+      overflow: hidden;
+      margin: 0;
+      
+      
+    }
+    
+    section.toggle-box {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      order: 1;
+      overflow: hidden;
+      background: var(--cor-primaria);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 235px;
+      
+    }
+    
+    #register-msg,
+    #login-msg {
+      font-size: 1em;
+    }
+    
+    .toggle-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--cor-primaria);
+      border-radius: 0 0 40% 40%;
+      transform: translateY(-100%);
+      transition: transform .9s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1;
+      
+    }
+    
+    .container.active .toggle-box::before {
+      transform: translateY(0);
+      
+    }
+    
+    .toggle-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      color: #fff;
+      padding: 0px;
+      width: 100%;
+      height: 100%;
+      
+    }
+    
+    .toggle-panel .btn {
+      margin-bottom: 20px;
+      
+    }
+    
+    .toggle-panel.toggle-left {
+      opacity: 1;
+      transition: opacity .4s ease;
+      
+    }
+    
+    .toggle-panel.toggle-right {
+      opacity: 0;
+      transition: opacity .4s ease;
+      
+    }
+    
+    .container.active .toggle-panel.toggle-left {
+      opacity: 0;
+      
+    }
+    
+    .container.active .toggle-panel.toggle-right {
+      opacity: 1;
+      
+    }
+    
+    section.form-box {
+      position: relative;
+      width: 100%;
+      order: 2;
+      right: 0 !important;
+      padding: 20px;
+      background: var(--card);
+      margin-top: -25px;
+      border-radius: 25px 25px 0 0;
+      z-index: 3;
+      min-height: 415px;
+      display: block;
+      
+    }
+    
+    .form-box.login {
+      display: block;
+      
+    }
+    
+    .form-box.register {
+      display: none;
+      
+    }
+    
+    .container.active .form-box.login {
+      display: none;
+      
+    }
+    
+    .container.active .form-box.register {
+      display: block;
+      
+    }
+    
+    div.input.box {
+      margin: 18px 0;
+      
+    }
+    
+    div.input.box input {
+      padding: 12px 45px 12px 15px;
+      font-size: 0.95em;
+      
+    }
+    
+    .input.box i {
+      right: 15px;
+      font-size: 18px;
+      
+    }
+    
+    main.container h1 {
+      font-size: 1.4em;
+      
+    }
+    
+    main.container p {
+      font-size: 0.88em;
+      
+    }
+    
+    .btn {
+      height: 44px;
+      font-size: 0.95em;
+    }
+    
+  }
+  

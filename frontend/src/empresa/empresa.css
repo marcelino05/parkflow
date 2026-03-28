@@ -1,0 +1,163 @@
+  
+  body {
+    background: linear-gradient(90deg, var(--fundo), var(--card));
+    font-size: 1em;
+  }
+  
+  .empresa-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fundo);
+    padding: 20px;
+    
+  }
+  
+  .empresa-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 900px;
+    width: 100%;
+    background: var(--card);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--borda);
+    
+  }
+  
+  /* LADO ESQUERDO */
+  .empresa-left {
+    background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-hover));
+    color: white;
+    padding: 40px;
+    
+  }
+  
+  .logo {
+    text-align: center;
+    
+  }
+  
+  .empresa-left h1 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    
+  }
+  
+  .empresa-left p {
+    opacity: 0.9;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    
+  }
+  
+  .empresa-left ul {
+    list-style: none;
+    padding: 0;
+    
+  }
+  
+  .empresa-left li {
+    margin-bottom: 10px;
+    font-size: 1em;
+    
+  }
+  
+  /* LADO DIREITO */
+  .empresa-right {
+    padding: 40px;
+    
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    
+  }
+  
+  .input-group {
+    position: relative;
+    
+  }
+  
+  .input-group i {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    
+  }
+  
+  input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    transition: 0.2s;
+    color: var(--texto);
+    font-weight: bold;
+    background: var(--borda);
+    font-size: 1em;
+    
+  }
+  
+  input:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    
+  }
+  
+  .btn-primar {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: var(--cor-primaria);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    
+  }
+  
+  .btn-primar:hover {
+    background: var(--cor-primaria-hover);
+    
+  }
+  
+  .trial-info {
+    margin-top: 15px;
+    font-size: 1em;
+    color: var(--sub);
+    text-align: center;
+    
+  }
+  
+  /* RESPONSIVO */
+  @media (max-width: 768px) {
+    .empresa-card {
+      grid-template-columns: 1fr;
+      
+    }
+    
+    .empresa-left {
+      display: none;
+      
+    }
+    
+    .input-group {
+      position: relative;
+      
+    }
+    
+    .input-group i {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      
+    }
+    
+  }

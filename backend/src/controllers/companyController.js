@@ -1,10 +1,17 @@
 import Company from "../models/Company.js";
 import User from "../models/User.js";
+import Parking from "../models/Parking.js";
 import validator from "validator"
+import planLimits from "../utils/planLimits.js";
 
 export const criarEmpresa = async (req, res) => {
   try {
-    const { nome, telefone, email, endereco } = req.body;
+    const {
+      nome,
+      telefone,
+      email,
+      endereco
+    } = req.body;
 
     if (!nome || !telefone || !email) {
       return res.status(400).json({
@@ -82,7 +89,8 @@ export const criarEmpresa = async (req, res) => {
       plano: "trial",
       status: "ativo",
       trialInicio: hoje,
-      trialFim: fimTrial
+      trialFim: fimTrial,
+      limites: planLimits.trial
     });
 
     usuario.empresaId = empresa._id;
@@ -124,7 +132,10 @@ export const buscarEmpresa = async (req, res) => {
       });
     }
 
-    res.json(empresa);
+    res.json({
+      success: true,
+      empresa
+    });
 
   } catch (erro) {
     res.status(500).json({
@@ -182,7 +193,7 @@ export const atualizarEmpresa = async (req, res) => {
       usuario.empresaId,
       updateData,
       {
-        returnDocument: 'after' 
+        returnDocument: 'after'
       }
     );
 
@@ -213,6 +224,7 @@ export const statusEmpresa = async (req, res) => {
 
     const agora = new Date()
     let diasRestantes = 0
+    let status = "ativo";
 
     if (empresa.trialFim) {
       diasRestantes = Math.max(
@@ -221,14 +233,32 @@ export const statusEmpresa = async (req, res) => {
       )
     }
 
-    const status = diasRestantes > 0 ? "ativo": "expirado"
+    if (empresa.plano === "trial") {
+      diasRestantes = Math.max(
+        0,
+        Math.ceil((empresa.trialFim - agora) / (1000 * 60 * 60 * 24))
+      );
+
+      if (diasRestantes === 0) status = "expirado";
+
+    } else {
+      if (empresa.dataExpiracaoPlano) {
+        diasRestantes = Math.max(
+          0,
+          Math.ceil((empresa.dataExpiracaoPlano - agora) / (1000 * 60 * 60 * 24))
+        );
+
+        if (diasRestantes === 0) status = "expirado";
+      }
+    }
 
     res.json({
       success: true,
       plano: empresa.plano,
       status,
-      diasRestantes
-    })
+      diasRestantes,
+      limites: empresa.limites
+    });
 
   } catch (erro) {
     res.status(500).json({
@@ -236,3 +266,70 @@ export const statusEmpresa = async (req, res) => {
     });
   }
 }
+
+export const usoEmpresa = async (req, res) => {
+  try {
+    const empresa = await Company.findById(req.empresaId);
+
+    if (!empresa) {
+      return res.status(404).json({
+        success: false,
+        message: "Empresa não encontrada"
+      });
+    }
+
+    // 🔢 CONTAGENS
+    const totalEstacionamentos = await Parking.countDocuments({
+      empresaId: req.empresaId
+    });
+
+    const totalOperadores = await User.countDocuments({
+      empresaId: req.empresaId
+    });
+
+    const totalVagas = await Parking.aggregate([{
+      $match: {
+        empresaId: empresa._id
+      }
+    },
+      {
+        $group: {
+          _id: null, total: {
+            $sum: "$totalVaga"
+          }
+        }
+      }]);
+
+    const vagasUsadas = totalVagas[0]?.total || 0;
+
+    res.json({
+      success: true,
+      uso: {
+        estacionamentos: {
+          usado: totalEstacionamentos,
+          limite: empresa.limites.maxEstacionamentos,
+          percentual: empresa.limites.maxEstacionamentos > 0
+          ? Math.round((totalEstacionamentos / empresa.limites.maxEstacionamentos) * 100): 0
+        },
+        operadores: {
+          usado: totalOperadores,
+          limite: empresa.limites.maxOperadores,
+          percentual: empresa.limites.maxOperadores > 0
+          ? Math.round((totalOperadores / empresa.limites.maxOperadores) * 100): 0
+        },
+        vagas: {
+          usado: vagasUsadas,
+          limite: empresa.limites.maxVagas,
+          percentual: empresa.limites.maxVagas > 0
+          ? Math.round((vagasUsadas / empresa.limites.maxVagas) * 100): 0
+        }
+      }
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      success: false,
+      message: erro.message
+    });
+  }
+};

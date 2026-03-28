@@ -19,12 +19,12 @@ import {
 import {
   permitir
 } from "../middlewares/roleMiddleware.js";
-
+import verifyPlan from "../middlewares/verifyPlan.js";
 
 const router = express.Router()
 
 // proteger rotas
-router.use(verificarToken, verificarEmpresa)
+router.use(verificarToken, verificarEmpresa, verifyPlan)
 
 // operador pode
 router.post("/entrada", permitir("admin", "operador"), registrarEntrada);
