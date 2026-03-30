@@ -42,46 +42,72 @@
   ]);
   
   /*CONFIG NAVBAR*/
+ document.addEventListener("DOMContentLoaded", () => {
+  
+  /* MENU TOGGLE */
   const menuToggle = document.getElementById("menu-toggle");
   const navLinks = document.getElementById("nav-links");
   
-  menuToggle.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
-    
-    // trocar ícone entre ☰ e ✖
-    const icon = menuToggle.querySelector('i');
-    icon.classList.toggle('bi-list');
-    icon.classList.toggle('bi-x');
-    i.classList.add("icor")
-  });
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+      
+      const icon = menuToggle.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("bi-list");
+        icon.classList.toggle("bi-x");
+      }
+    });
+  }
   
-  //MUDAR TEMA
-  document.getElementById("toggle-theme").addEventListener("click", e => {
-    
-    e.preventDefault()
-    
-    
-  })
-  
-  // Seleciona o botão
+  /* TEMA */
   const toggleTheme = document.getElementById("toggle-theme");
-  const body = document.body;
-  const icon = toggleTheme.querySelector("i");
   
-  const texto = toggleTheme.querySelector("span");
+  if (toggleTheme) {
+    const body = document.body;
+    const icon = toggleTheme.querySelector("i");
+    const texto = toggleTheme.querySelector("span");
+    
+    toggleTheme.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      body.classList.toggle("dark");
+      
+      if (body.classList.contains("dark")) {
+        icon?.classList.remove("bi-moon");
+        icon?.classList.add("bi-sun");
+        
+        if (texto) texto.textContent = " Modo Claro";
+        
+        localStorage.setItem("tema", "dark");
+        
+      } else {
+        icon?.classList.remove("bi-sun");
+        icon?.classList.add("bi-moon");
+        
+        if (texto) texto.textContent = " Modo Escuro";
+        
+        localStorage.setItem("tema", "light");
+      }
+    });
+  }
   
-  toggleTheme.addEventListener("click", (e) => {
-    e.preventDefault();
+  /* CARREGAR TEMA SALVO */
+  const tema = localStorage.getItem("tema");
+  
+  if (tema === "dark") {
+    document.body.classList.add("dark");
     
-    body.classList.toggle("dark");
-    
-    if (body.classList.contains("dark")) {
-      icon.classList.remove("bi-moon");
-      icon.classList.add("bi-sun");
-      texto.textContent = " Modo Claro";
-    } else {
-      icon.classList.remove("bi-sun");
-      icon.classList.add("bi-moon");
-      texto.textContent = " Modo Escuro";
+    const toggleTheme = document.getElementById("toggle-theme");
+    if (toggleTheme) {
+      const icon = toggleTheme.querySelector("i");
+      const texto = toggleTheme.querySelector("span");
+      
+      icon?.classList.remove("bi-moon");
+      icon?.classList.add("bi-sun");
+      
+      if (texto) texto.textContent = " Modo Claro";
     }
-  });
+  }
+  
+});

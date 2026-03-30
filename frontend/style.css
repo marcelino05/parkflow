@@ -1,39 +1,3 @@
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    text-decoration: none;
-    outline: none;
-    border: none;
-    font-family: Arial, Helvetica, sans-serif;
-    
-  }
-  
-  
-  :root {
-    --cor-primaria: #2563EB;
-    --cor-primaria-hover: #1d4ed8;
-    --cor-sucesso: #16A34A;
-    --cor-alerta: #F59E0B;
-    --cor-erro: #DC2626;
-    
-    --fundo: #f4f4f4;
-    --card: #FFFFFF;
-    --texto: #0F172A;
-    --borda: #E2E8F0;
-    --sub: #989898;
-    --nav: #FFFFFF7A;
-  }
-  
-  .dark {
-    --fundo: #0F172A;
-    --card: #1E293B;
-    --texto: #F1F5F9;
-    --borda: #334155;
-    --nav: #00000063;
-    
-  }
-  
   body {
     background: var(--fundo);
     color: var(--texto);
@@ -496,7 +460,7 @@
   .plan {
     background: var(--card);
     border: 1px solid var(--borda);
-    width: 360px;
+    width: 320px;
     padding: 40px 25px;
     position: relative;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.06);

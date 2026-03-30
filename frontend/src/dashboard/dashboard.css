@@ -1,0 +1,257 @@
+  body {
+    display: flex;
+    background: var(--fundo);
+    color: var(--texto);
+  }
+  
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    height: 100vh;
+    background: var(--card);
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px;
+    border-right: 1px solid var(--borda);
+    transition: 0.3s;
+    z-index: 899;
+    
+  }
+  
+  .sidebar.hide {
+    left: -220px;
+  }
+  
+  .logo {
+    margin-bottom: 20px;
+    color: var(--cor-primaria);
+    
+  }
+  
+  .logo b {
+    color: var(--cor-sucesso);
+  }
+  
+  .sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .sidebar a {
+    text-decoration: none;
+    color: var(--texto);
+    display: flex;
+    gap: 10px;
+    
+  }
+  
+  /* LAYOUT */
+  .layout {
+    margin-left: 220px;
+    width: 100%;
+  }
+  
+  /* HEADER */
+  .header {
+    height: 60px;
+    background: var(--card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--borda);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    
+  }
+  
+  .left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .btn-primary {
+    background: var(--cor-primaria);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  
+  /* MAIN */
+  .main {
+    padding: 20px;
+    max-width: 1200px;
+  }
+  
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  
+  /* CARD BASE */
+  .card {
+    position: relative;
+    padding: 20px;
+    border-radius: 18px;
+    color: #fff;
+    overflow: hidden;
+    transition: 0.3s;
+  }
+  
+  /* GRADIENTES (VIDA REAL) */
+  .card.receita {
+    background: linear-gradient(135deg, #2563EB, #1d4ed8);
+  }
+  
+  .card.ativos {
+    background: linear-gradient(135deg, #16A34A, #15803d);
+  }
+  
+  .card.entradas {
+    background: linear-gradient(135deg, #F59E0B, #d97706);
+  }
+  
+  .card.vagas {
+    background: linear-gradient(135deg, #DC2626, #b91c1c);
+  }
+  
+  /* EFEITO GLOW */
+  .card::after {
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    top: -50px;
+    right: -50px;
+  }
+  
+  /* HEADER */
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  /* ÍCONE BONITO */
+  .icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.5em;
+    backdrop-filter: blur(10px);
+  }
+  
+  /* TEXTO */
+  .info span {
+    font-size: 0.9em;
+    opacity: 0.8;
+    
+  }
+  
+  .info h2 {
+    font-size: 1.8em;
+    margin-top: 5px;
+  }
+  
+  /* FOOTER */
+  .card-footer {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .up {
+    color: #4ade80;
+    font-weight: bold;
+  }
+  
+  .down {
+    color: #f87171;
+    font-weight: bold;
+  }
+  
+  /* HOVER */
+  .card:hover {
+    transform: translateY(-8px) scale(1.03);
+  }
+  
+  /* CHARTS */
+  .charts {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .chart-box {
+    background: var(--card);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--borda);
+    box-shadow: var(--sombra);
+  }
+  
+  /* RESPONSIVO */
+  @media (max-width: 768px) {
+    .sidebar {
+      left: -220px;
+    }
+    
+    .sidebar.active {
+      left: 0;
+    }
+    
+    .layout {
+      margin-left: 0;
+    }
+    
+    .charts {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media screen and (min-width: 768px) {
+    .right i {
+      font-size: 1.5em;
+      gap: 40px;
+    }
+    
+    h2 {
+      font-size: 2em;
+    }
+    
+    h3 {
+      font-size: 1.5em;
+    }
+    
+    a {
+      font-size: 1.3em;
+    }
+  }
+  
+  a {
+    font-weight: 500;
+  }
+  i{
+    color: #fff;
+  }
