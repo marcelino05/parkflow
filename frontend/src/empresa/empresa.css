@@ -87,6 +87,7 @@
     position: absolute;
     top: 50%;
     right: 12px;
+    color: var(--texto);
     transform: translateY(-50%);
     
   }

@@ -1,42 +1,114 @@
-// MENU
-const btnMenu = document.getElementById("btn-menu")
-const sidebar = document.getElementById("sidebar")
-const icon = btnMenu.querySelector("i")
+const API = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
 
-btnMenu.onclick = () => {
-  sidebar.classList.toggle("active")
-  
-  if (sidebar.classList.contains("active")) {
-    icon.classList.replace("bi-list", "bi-x")
-  } else {
-    icon.classList.replace("bi-x", "bi-list")
-  }
+// PROTEÇÃO
+if (!token) {
+  window.location.href = "../auth/auth.html";
 }
 
-// GRÁFICOS
-const ctx1 = document.getElementById("chart1")
-const ctx2 = document.getElementById("chart2")
+// ===== LOADING =====
+function mostrarLoading() {
+  document.getElementById("receita").innerText = "...";
+  document.getElementById("ativos").innerText = "...";
+  document.getElementById("entradas").innerText = "...";
+  document.getElementById("vagas").innerText = "...";
+}
 
-new Chart(ctx1, {
+// ===== GRÁFICOS =====
+const chartReceita = new Chart(document.getElementById("chart1"), {
   type: "line",
   data: {
-    labels: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"],
+    labels: [],
     datasets: [{
       label: "Receita",
-      data: [1200, 1900, 800, 1500, 2000, 1700, 2200],
+      data: [],
       tension: 0.4
     }]
   }
-})
+});
 
-new Chart(ctx2, {
+const chartEntradas = new Chart(document.getElementById("chart2"), {
   type: "bar",
   data: {
-    labels: ["8h", "10h", "12h", "14h", "16h", "18h"],
+    labels: [],
     datasets: [{
       label: "Entradas",
-      data: [5, 10, 7, 12, 9, 6]
+      data: []
     }]
   }
-})
+});
 
+// ===== DASHBOARD (CARDS) =====
+async function carregarDashboard() {
+  mostrarLoading();
+  
+  try {
+    const res = await fetch(`${API}/session/dashboard`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    const result = await res.json();
+    const data = result.dados;
+    
+    document.getElementById("receita").innerText = data.receitaHoje + " MZN";
+    document.getElementById("ativos").innerText = data.carrosAtivos;
+    document.getElementById("entradas").innerText = data.entradasHoje;
+    document.getElementById("vagas").innerText = data.vagasDisponiveis;
+    
+  } catch (err) {
+    console.error("Erro dashboard:", err);
+  }
+}
+
+// ===== GRÁFICOS =====
+async function carregarGraficos() {
+  try {
+    // ===== RECEITA =====
+    const resReceita = await fetch(`${API}/session/receita?periodo=7dias`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    const receita = await resReceita.json();
+    
+    if (receita.success) {
+      chartReceita.data.labels = receita.dados.map(d =>
+        `${d._id.dia}/${d._id.mes}`
+      );
+      
+      chartReceita.data.datasets[0].data = receita.dados.map(d => d.total);
+      chartReceita.update();
+    }
+    
+    // ===== ENTRADAS POR HORA =====
+    const resEntradas = await fetch(`${API}/session/receita/hora`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    const entradas = await resEntradas.json();
+    
+    if (entradas.success) {
+      chartEntradas.data.labels = entradas.dados.map(d => `${d._id.hora}h`);
+      chartEntradas.data.datasets[0].data = entradas.dados.map(d => d.total);
+      chartEntradas.update();
+    }
+    
+  } catch (err) {
+    console.error("Erro gráficos:", err);
+  }
+}
+
+// ===== INIT =====
+carregarDashboard();
+carregarGraficos();
+
+// AUTO REFRESH
+setInterval(() => {
+  carregarDashboard();
+  carregarGraficos();
+}, 10000);

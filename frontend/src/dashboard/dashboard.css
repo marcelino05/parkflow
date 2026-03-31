@@ -236,6 +236,10 @@
       gap: 40px;
     }
     
+    .header span i{
+      display: none;
+    }
+    
     h2 {
       font-size: 2em;
     }
@@ -251,7 +255,4 @@
   
   a {
     font-weight: 500;
-  }
-  i{
-    color: #fff;
   }

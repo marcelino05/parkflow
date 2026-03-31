@@ -27,7 +27,7 @@ app.use(helmet())
 app.use(cors())
 const limitador = rateLimit( {
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 150
 })
 app.use(limitador)
 

@@ -69,19 +69,17 @@
       
       
       updateToast(toast, "Cadastrado com sucesso", "sucesso")
-      // dentro do register() depois de cadastro com sucesso
-      const container = document.querySelector("main.container");
-      const loginBox = document.querySelector(".form-box.login");
-      const registerBox = document.querySelector(".form-box.register");
+      if (!data.token) return
       
-      // primeiro garante que login está visível para animação
-      loginBox.style.visibility = "visible";
-      registerBox.style.visibility = "hidden";
-      
-      // depois dispara a animação de deslizar
-      setTimeout(() => {
-        container.classList.add("active");
-      }, 50); // um pequeno delay permite que o browser registre a mudança de visibility
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        // opcional: mostrar mensagem de sucesso aqui
+        setTimeout(() => {
+          window.location.href = "../empresa/empresa.html";
+        }, 1500);
+      } else {
+        console.error("Token não recebido");
+      }
       
       clearfields("formRegister")
       
@@ -143,7 +141,7 @@
         localStorage.setItem("token", data.token);
         // opcional: mostrar mensagem de sucesso aqui
         setTimeout(() => {
-          window.location.href = "../empresa/empresa.html";
+          window.location.href = "../dashboard/dashboard.html";
         }, 1500);
       } else {
         console.error("Token não recebido");

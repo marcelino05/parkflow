@@ -3,7 +3,7 @@ import { createToast, updateToast, removeToast } from "../utils/toast.js"
 const token = localStorage.getItem("token")
 
 if (!token) {
-  window.location.href = "../src/auth.html"
+  window.location.href = "../auth/auth.html"
 }
 
 document.getElementById("empresaForm").addEventListener("submit", (e) => {
@@ -162,7 +162,19 @@ const sendCompanyToAPI = async (data) => {
     }
     
     updateToast(toastId, "Empresa criada com sucesso", "sucesso")
-    
+      //  guardar token
+  if (!data.token) return
+  
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    // opcional: mostrar mensagem de sucesso aqui
+    setTimeout(() => {
+      window.location.href = "../dashboard/dashboard.html";
+    }, 1500);
+  } else {
+    console.error("Token não recebido");
+  }
+  
     clearfields("empresaForm")
     
   } catch (error) {
