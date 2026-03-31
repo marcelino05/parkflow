@@ -279,7 +279,6 @@ export const vagasDisponiveis = async (req, res) => {
 //*****************************************
 export const receitaTotal = async (req, res) => {
   try {
-
     const resultado = await ParkingSession.aggregate([{
       $match: {
         empresaId: req.empresaId,
@@ -309,28 +308,45 @@ export const receitaTotal = async (req, res) => {
     });
   }
 };
-
 //*************LinkWa_parkflow*************
 // => DASHBOARD COMPLETO
 //*****************************************
 
 export const dashboard = async (req, res) => {
   try {
+    const empresaId = req.empresaId;
 
-    const ativos = await ParkingSession.countDocuments({
-      empresaId: req.empresaId,
+    // ===== HOJE =====
+    const hojeInicio = new Date();
+    hojeInicio.setHours(0, 0, 0, 0);
+
+    const hojeFim = new Date();
+    hojeFim.setHours(23, 59, 59, 999);
+
+    // ===== CARROS ATIVOS =====
+    const carrosAtivos = await ParkingSession.countDocuments({
+      empresaId,
       status: "ativo"
     });
 
-    const finalizados = await ParkingSession.countDocuments({
-      empresaId: req.empresaId,
-      status: "finalizado"
+    // ===== ENTRADAS HOJE =====
+    const entradasHoje = await ParkingSession.countDocuments({
+      empresaId,
+      horaEntrada: {
+        $gte: hojeInicio,
+        $lte: hojeFim
+      }
     });
 
-    const receita = await ParkingSession.aggregate([{
+    // ===== RECEITA HOJE =====
+    const receitaHojeAgg = await ParkingSession.aggregate([{
       $match: {
-        empresaId: req.empresaId,
-        status: "finalizado"
+        empresaId,
+        status: "finalizado",
+        horaSaida: {
+          $gte: hojeInicio,
+          $lte: hojeFim
+        }
       }
     },
       {
@@ -342,12 +358,38 @@ export const dashboard = async (req, res) => {
         }
       }]);
 
+    const receitaHoje = receitaHojeAgg[0]?.total || 0;
+
+    // ===== VAGAS DISPONÍVEIS (TODOS ESTACIONAMENTOS) =====
+    const estacionamentos = await Parking.find({
+      empresaId
+    });
+
+    let totalVagas = 0;
+    let totalOcupadas = 0;
+
+    for (const est of estacionamentos) {
+      totalVagas += est.totalVaga;
+
+      const ocupadas = await ParkingSession.countDocuments({
+        empresaId,
+        estacionamentoId: est._id,
+        status: "ativo"
+      });
+
+      totalOcupadas += ocupadas;
+    }
+
+    const vagasDisponiveis = Math.max(0, totalVagas - totalOcupadas);
+
+    // ===== RESPOSTA FINAL =====
     res.json({
       success: true,
       dados: {
-        carrosAtivos: ativos,
-        carrosFinalizados: finalizados,
-        receitaTotal: receita[0]?.total || 0
+        receitaHoje,
+        carrosAtivos,
+        entradasHoje,
+        vagasDisponiveis
       }
     });
 
@@ -361,94 +403,118 @@ export const dashboard = async (req, res) => {
 
 
 //*************LinkWa_parkflow*************
-// => DASHBOARD COMPLETO
+// => receita Por Periodo COMPLETO
 //*****************************************
 export const receitaPorPeriodo = async (req, res) => {
   try {
-
     const periodo = req.query.periodo;
 
     const agora = new Date();
-
     let dataInicio;
-    let dataFim = new Date();
 
-    // ===== DEFINIÇÃO DOS PERÍODOS =====
-    if (periodo === "hoje") {
-
-      dataInicio = new Date();
-      dataInicio.setHours(0, 0, 0, 0);
-
-      dataFim.setHours(23, 59, 59, 999);
-
-    } else if (periodo === "7dias") {
-
+    if (periodo === "7dias") {
       dataInicio = new Date();
       dataInicio.setDate(agora.getDate() - 7);
-
     } else if (periodo === "mes") {
-
-      dataInicio = new Date(
-        agora.getFullYear(),
-        agora.getMonth(),
-        1
-      );
-
-      dataFim = new Date(
-        agora.getFullYear(),
-        agora.getMonth() + 1,
-        0,
-        23, 59, 59, 999
-      );
-
+      dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
     } else {
-
       return res.status(400).json({
         success: false,
-        message: "Período inválido. Use: hoje, 7dias ou mes"
+        message: "Período inválido"
       });
-
     }
 
-    // ===== CONSULTA =====
     const resultado = await ParkingSession.aggregate([{
       $match: {
         empresaId: req.empresaId,
         status: "finalizado",
         horaSaida: {
-          $gte: dataInicio,
-          $lte: dataFim
+          $gte: dataInicio
         }
       }
     },
       {
         $group: {
-          _id: null,
+          _id: {
+            dia: {
+              $dayOfMonth: "$horaSaida"
+            },
+            mes: {
+              $month: "$horaSaida"
+            },
+            ano: {
+              $year: "$horaSaida"
+            }
+          },
           total: {
             $sum: "$valorCobrado"
-          },
-          totalRegistros: {
-            $sum: 1
           }
+        }
+      },
+      {
+        $sort: {
+          "_id.ano": 1,
+          "_id.mes": 1,
+          "_id.dia": 1
         }
       }]);
 
-    const total = resultado[0]?.total || 0;
-    const totalRegistros = resultado[0]?.totalRegistros || 0;
-
     res.json({
       success: true,
-      periodo,
-      total,
-      totalRegistros
+      dados: resultado
     });
 
   } catch (erro) {
-
     res.status(500).json({
       success: false,
       message: "Erro ao calcular receita: " + erro.message
     });
+  }
+};
 
+
+
+//*************LinkWa_parkflow*************
+// => receita Por hora COMPLETO
+//*****************************************
+
+export const entradasPorHora = async (req, res) => {
+  try {
+    const resultado = await ParkingSession.aggregate([{
+      $match: {
+        empresaId: req.empresaId,
+        horaEntrada: {
+          $exists: true
+        }
+      }
+    },
+      {
+        $group: {
+          _id: {
+            hora: {
+              $hour: "$horaEntrada"
+            }
+          },
+          total: {
+            $sum: 1
+          }
+        }
+      },
+      {
+        $sort: {
+          "_id.hora": 1
+        }
+      }]);
+
+    res.json({
+      success: true,
+      dados: resultado
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      success: false,
+      message: "Erro ao calcular entradas por hora"
+    });
   }
 };

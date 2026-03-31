@@ -7,7 +7,8 @@ import {
   vagasDisponiveis,
   receitaTotal,
   dashboard,
-  receitaPorPeriodo
+  receitaPorPeriodo,
+  entradasPorHora
 } from "../controllers/sessionController.js"
 
 import {
@@ -34,6 +35,7 @@ router.post("/saida", permitir("admin", "operador"), registrarSaida);
 router.get("/receitaTotal", permitir("admin"), receitaTotal);
 router.get("/dashboard", permitir("admin"), dashboard);
 router.get("/receita", permitir("admin"), receitaPorPeriodo);
+router.get("/receita/hora", permitir("admin"), entradasPorHora);
 
 // ambos podem ver histórico (opcional)
 router.get("/historico", permitir("admin", "operador"), listarHistorico);
