@@ -3,15 +3,9 @@ import Company from "../models/Company.js";
 
 export const criarPedidoPagamento = async (req, res) => {
   try {
+    const { valor, metodo, comprovante } = req.body;
 
-    const {
-      valor,
-      metodo,
-      comprovante
-    } = req.body;
-
-
-    // 🔍 buscar empresa pelo usuário
+    // 🔍 buscar empresa
     const empresa = await Company.findOne({
       proprietarioId: req.usuarioId
     });
@@ -23,34 +17,41 @@ export const criarPedidoPagamento = async (req, res) => {
       });
     }
 
-    if (valor <= 0) {
+    // validações
+    if (!valor || valor <= 0) {
       return res.status(400).json({
-        success: false, message: "Valor inválido"
-      })
+        success: false,
+        message: "Valor inválido"
+      });
     }
 
-    // Bloquear pagamento Duplicado
+    if (!metodo) {
+      return res.status(400).json({
+        success: false,
+        message: "Método obrigatório"
+      });
+    }
+
+    // 🔒 evitar duplicado
     const pagamentoExistente = await Payment.findOne({
-      empresaId: req.empresaId,
+      empresaId: empresa._id,
       status: "pendente"
-    })
+    });
+
     if (pagamentoExistente) {
       return res.status(400).json({
-        success: false, message: "Já existe um pedido de pagamento pendente"
-      })
+        success: false,
+        message: "Já existe um pagamento pendente"
+      });
     }
 
-    if (pagamento.status === "confirmado") {
-      return res.status(400).json({
-        success: "Pagamento já confirmado"
-      })
-    }
-
+    // criar pagamento
     const pagamento = await Payment.create({
       empresaId: empresa._id,
       valor,
       metodo,
-      comprovante
+      comprovante,
+      status: "pendente"
     });
 
     res.status(201).json({
@@ -69,10 +70,14 @@ export const criarPedidoPagamento = async (req, res) => {
 
 export const confirmarPagamento = async (req, res) => {
   try {
+    const { pagamentoId } = req.body;
 
-    const {
-      pagamentoId
-    } = req.body;
+    if (!pagamentoId) {
+      return res.status(400).json({
+        success: false,
+        message: "ID do pagamento obrigatório"
+      });
+    }
 
     const pagamento = await Payment.findById(pagamentoId);
 
@@ -90,6 +95,7 @@ export const confirmarPagamento = async (req, res) => {
       });
     }
 
+    // confirmar pagamento
     pagamento.status = "confirmado";
     await pagamento.save();
 
@@ -97,9 +103,12 @@ export const confirmarPagamento = async (req, res) => {
 
     const hoje = new Date();
 
-    // lógica inteligente de renovação
-    const base = empresa.dataExpiracaoPlano && empresa.dataExpiracaoPlano > hoje
-    ? empresa.dataExpiracaoPlano: hoje;
+    // 🔥 lógica SaaS correta
+    const base =
+      empresa.dataExpiracaoPlano &&
+      empresa.dataExpiracaoPlano > hoje
+        ? empresa.dataExpiracaoPlano
+        : hoje;
 
     const novaExpiracao = new Date(base);
     novaExpiracao.setDate(base.getDate() + 30);
@@ -112,13 +121,13 @@ export const confirmarPagamento = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Pagamento confirmado e sistema liberado"
+      message: "Pagamento confirmado e plano ativado"
     });
 
   } catch (erro) {
     res.status(500).json({
       success: false,
-      message: "Erro ao confirmar pagamento"
+      message: "Erro ao confirmar pagamento: " + erro.message
     });
   }
 };

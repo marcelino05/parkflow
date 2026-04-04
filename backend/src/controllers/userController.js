@@ -1,11 +1,17 @@
 import User from "../models/User.js";
+import Company from "../models/Company.js";
 import bcrypt from "bcryptjs";
+import planLimits from "../utils/planLimits.js";
 
 export const criarOperador = async (req, res) => {
   try {
-    const { nome, telefone, email, senha } = req.body;
+    const {
+      nome,
+      telefone,
+      email,
+      senha
+    } = req.body;
 
-    // Validação de campos
     if (!nome || !telefone || !email || !senha) {
       return res.status(400).json({
         success: false,
@@ -13,12 +19,39 @@ export const criarOperador = async (req, res) => {
       });
     }
 
-    // Checar email duplicado
-    const emailExiste = await User.findOne({ email });
+    const emailExiste = await User.findOne({
+      email
+    });
     if (emailExiste) {
       return res.status(400).json({
         success: false,
         message: "Email já cadastrado."
+      });
+    }
+
+    const usuario = await User.findById(req.usuarioId);
+
+    if (!usuario || !usuario.empresaId) {
+      return res.status(404).json({
+        success: false,
+        message: "Empresa não encontrada."
+      });
+    }
+
+    const empresa = await Company.findById(usuario.empresaId);
+
+    // 🔥 verificar limite
+    const totalOperadores = await User.countDocuments({
+  empresaId: empresa._id,
+  role: { $in: ["operador"] }
+});
+
+    const limites = planLimits[empresa.plano];
+
+    if (totalOperadores >= limites.maxOperadores) {
+      return res.status(403).json({
+        success: false,
+        message: "Limite de operadores atingido."
       });
     }
 
@@ -29,7 +62,7 @@ export const criarOperador = async (req, res) => {
       telefone,
       email,
       senha: senhaHash,
-      empresaId: req.empresaId,
+      empresaId: empresa._id,
       role: "operador"
     });
 
@@ -44,6 +77,7 @@ export const criarOperador = async (req, res) => {
         role: operador.role
       }
     });
+
   } catch (erro) {
     res.status(500).json({
       success: false,

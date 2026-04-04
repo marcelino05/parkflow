@@ -1,0 +1,95 @@
+main{
+  background: var(--borda);
+
+}
+.company-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* CARD */
+.company-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  padding: 20px;
+  border: 1px solid var(--borda);
+}
+.company-card:hover{
+  border-color: var(--cor-alerta);
+  transform: scale(1.03);
+  
+}
+/* HEADER DA EMPRESA */
+.company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.company-card h3{
+  margin-bottom: 10px;
+}
+
+/* INFO */
+.company-info p {
+  margin: 8px 0;
+  color: var(--texto);
+}
+
+.top-info button{
+  background: var(--cor-sucesso);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 500;
+  margin: 5px 0 10px 0;
+}
+
+.company-info strong {
+  color: var(--sub);
+}
+
+/* PLANO */
+.plan {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--cor-primaria);
+  color: #fff;
+  font-size: 12px;
+}
+
+/* LIMITES */
+.limit {
+  margin-bottom: 15px;
+}
+
+.limit span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--sub);
+}
+
+/* BARRA */
+.bar {
+  width: 100%;
+  height: 8px;
+  background: var(--borda);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background: var(--cor-primaria);
+  transition: width 0.3s ease;
+}
+
+small {
+  color: var(--sub);
+}

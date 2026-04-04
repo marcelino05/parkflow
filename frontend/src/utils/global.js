@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   
+  // =====================
+  // THEME
+  // =====================
   const themeBtn = document.getElementById("themeBtn");
   
-  /* CARREGAR TEMA SALVO */
   const temaSalvo = localStorage.getItem("tema");
   
   if (temaSalvo === "dark") {
@@ -14,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  /* BOTÃO DE TROCAR TEMA */
   if (themeBtn) {
     themeBtn.addEventListener("click", () => {
       
@@ -33,6 +34,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
     });
+  }
+  
+  // =====================
+  // MENU
+  // =====================
+  const btnMenu = document.getElementById("btn-menu");
+  const sidebar = document.getElementById("sidebar");
+  
+  if (btnMenu && sidebar) {
+    
+    const icon = btnMenu.querySelector("i");
+    
+    btnMenu.onclick = () => {
+      sidebar.classList.toggle("active");
+      
+      if (sidebar.classList.contains("active")) {
+        icon?.classList.replace("bi-list", "bi-x");
+      } else {
+        icon?.classList.replace("bi-x", "bi-list");
+      }
+    };
+    
   }
   
 });

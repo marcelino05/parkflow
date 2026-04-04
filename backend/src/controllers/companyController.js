@@ -124,7 +124,8 @@ export const buscarEmpresa = async (req, res) => {
       });
     }
 
-    const empresa = await Company.findById(usuario.empresaId);
+    const empresa = await Company.findById(usuario.empresaId)
+  .populate("proprietarioId", "nome");
 
     if (!empresa) {
       return res.status(404).json({
@@ -134,8 +135,10 @@ export const buscarEmpresa = async (req, res) => {
 
     res.json({
       success: true,
-      empresa
+      empresa,
+      nomeProprietario: empresa.proprietarioId.nome
     });
+
 
   } catch (erro) {
     res.status(500).json({

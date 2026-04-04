@@ -1,12 +1,13 @@
 import Parking from "../models/Parking.js"
 import mongoose from "mongoose";
+import planLimits from "../utils/planLimits.js";
+import ParkingSession from "../models/ParkingSession.js";
 
 //==========LinkWa_parkflow==================
 //criarEstacionamento POST /parking
 //===========================================
 export const criarEstacionamento = async (req, res) => {
   try {
-
     const {
       nome,
       endereco,
@@ -14,21 +15,24 @@ export const criarEstacionamento = async (req, res) => {
       precoPorHora
     } = req.body;
 
-    if (!nome?.trim() || totalVaga === undefined ||!endereco?.trim()) {
+    if (!nome?.trim() || totalVaga === undefined || !endereco?.trim()) {
       return res.status(400).json({
-        success: false, message: "Todos os campos são obrigatórios"
+        success: false,
+        message: "Todos os campos são obrigatórios"
       });
     }
 
     if (isNaN(precoPorHora) || precoPorHora <= 0) {
       return res.status(400).json({
-        success: false, mmessage: "Preço por hora inválido"
-      })
+        success: false,
+        message: "Preço por hora inválido"
+      });
     }
 
     if (!req.empresaId) {
       return res.status(403).json({
-        success: false, message: "Empresa não identificada"
+        success: false,
+        message: "Empresa não identificada"
       });
     }
 
@@ -36,20 +40,47 @@ export const criarEstacionamento = async (req, res) => {
 
     if (isNaN(vagas) || vagas <= 0) {
       return res.status(400).json({
-        success: false, message: "Total de vagas inválido"
+        success: false,
+        message: "Total de vagas inválido"
       });
     }
-const existente = await Parking.findOne({
-  nome: nome.trim(),
-  empresaId: req.empresaId
-});
 
-if (existente) {
-  return res.status(400).json({
-    success: false,
-    message: "Já existe um estacionamento com esse nome"
-  });
-}
+    const empresa = req.empresa || null;
+
+    if (empresa && planLimits[empresa.plano]) {
+      const limites = planLimits[empresa.plano];
+
+      const totalParques = await Parking.countDocuments({
+        empresaId: req.empresaId
+      });
+
+      if (totalParques >= limites.maxEstacionamentos) {
+        return res.status(403).json({
+          success: false,
+          message: "Limite de estacionamentos atingido no seu plano"
+        });
+      }
+
+      if (vagas > limites.maxVagas) {
+        return res.status(403).json({
+          success: false,
+          message: "Limite de vagas excedido no seu plano"
+        });
+      }
+    }
+
+    const existente = await Parking.findOne({
+      nome: nome.trim(),
+      empresaId: req.empresaId
+    });
+
+    if (existente) {
+      return res.status(400).json({
+        success: false,
+        message: "Já existe um estacionamento com esse nome"
+      });
+    }
+
     const estacionamento = await Parking.create({
       nome: nome.trim(),
       endereco: endereco.trim(),
@@ -58,12 +89,15 @@ if (existente) {
       empresaId: req.empresaId
     });
 
-    res.status(201).json(estacionamento);
+    res.status(201).json({
+      success: true,
+      estacionamento
+    });
 
   } catch (erro) {
-
     res.status(500).json({
-      success: false, message: "Erro ao criar estacionamento"
+      success: false,
+      message: "Erro ao criar estacionamento: " + erro.message
     });
   }
 };
@@ -72,15 +106,12 @@ if (existente) {
 //BuscarEstacionamento Get /parking
 //===========================================
 
-
-
 export const buscarEstacionamento = async (req, res) => {
   try {
     const {
       id
     } = req.params;
 
-    // valida ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -104,10 +135,11 @@ export const buscarEstacionamento = async (req, res) => {
       success: true,
       estacionamento
     });
+
   } catch (erro) {
     res.status(500).json({
       success: false,
-      message: "Erro ao buscar Estacionamento: " + erro.message
+      message: "Erro ao buscar estacionamento: " + erro.message
     });
   }
 };
@@ -126,15 +158,15 @@ export const atualizarEstacionamento = async (req, res) => {
       if (req.body[c] !== undefined) {
         if (c === 'totalVaga' || c === 'precoPorHora') {
           const num = Number(req.body[c]);
-          if (isNaN(num)) return res.status(400).json({
-            success: false,
-            message: `${c} deve ser um número válido`
-          });
+          if (isNaN(num)) {
+            return res.status(400).json({
+              success: false,
+              message: `${c} deve ser um número válido`
+            });
+          }
           updateData[c] = num;
         } else if (typeof req.body[c] === 'string') {
           updateData[c] = req.body[c].trim();
-        } else {
-          updateData[c] = req.body[c];
         }
       }
     }
@@ -145,8 +177,8 @@ export const atualizarEstacionamento = async (req, res) => {
       },
       updateData,
       {
-        returnDocument: 'after'
-      }
+        new: true
+      } // ✅ melhor que returnDocument
     );
 
     if (!estacionamento) {
@@ -168,6 +200,42 @@ export const atualizarEstacionamento = async (req, res) => {
     });
   }
 };
+
 //==========LinkWa_parkflow==================
-//DesabilitarEstacionamento putch /parking
+//ListarEstacionamentos GET /parking
 //===========================================
+export const listarEstacionamentos = async (req, res) => {
+  try {
+    const estacionamentos = await Parking.find({
+      empresaId: req.empresaId
+    });
+
+    const resultado = await Promise.all(
+      estacionamentos.map(async (p) => {
+
+        const ocupadas = await ParkingSession.countDocuments({
+          estacionamentoId: p._id,
+          empresaId: req.empresaId,
+          status: "ativo"
+        });
+
+        return {
+          ...p.toObject(),
+          vagasOcupadas: ocupadas,
+          vagasDisponiveis: p.totalVaga - ocupadas
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      estacionamentos: resultado
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+};

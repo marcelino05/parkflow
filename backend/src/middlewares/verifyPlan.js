@@ -1,6 +1,12 @@
 import Company from "../models/Company.js";
+import Parking from "../models/Parking.js";
+import User from "../models/User.js";
+import planLimits from "../utils/planLimits.js";
 
-const verifyPlan = async (req, res, next) => {
+// =======================
+// VERIFICAR PLANO
+// =======================
+export const verifyPlan = async (req, res, next) => {
   try {
     const empresa = await Company.findById(req.empresaId);
 
@@ -21,7 +27,7 @@ const verifyPlan = async (req, res, next) => {
 
         return res.status(403).json({
           success: false,
-          message: "Trial expirado. Faça upgrade para continuar."
+          message: "Trial expirado. Faça upgrade."
         });
       }
     }
@@ -42,13 +48,15 @@ const verifyPlan = async (req, res, next) => {
       }
     }
 
-    // 🔥 Se estiver ativo
     if (empresa.status === "suspenso") {
       return res.status(403).json({
         success: false,
-        message: "Conta suspensa. Regularize seu plano."
+        message: "Conta suspensa."
       });
     }
+
+    // 🔥 IMPORTANTE
+    req.empresa = empresa;
 
     next();
 
@@ -60,4 +68,58 @@ const verifyPlan = async (req, res, next) => {
   }
 };
 
-export default verifyPlan;
+// =======================
+// LIMITES DO PLANO
+// =======================
+export const checkPlanLimits = (tipo) => {
+  return async (req, res, next) => {
+    try {
+      const empresa = req.empresa;
+      const empresaId = empresa._id;
+
+      const limites = planLimits[empresa.plano];
+
+      if (!limites) {
+        return res.status(400).json({
+          success: false,
+          message: "Plano inválido"
+        });
+      }
+
+      // 🔹 ESTACIONAMENTO
+      if (tipo === "parking") {
+        const total = await Parking.countDocuments({ empresaId });
+
+        if (total >= limites.maxEstacionamentos) {
+          return res.status(403).json({
+            success: false,
+            message: "Limite de estacionamentos atingido"
+          });
+        }
+      }
+
+      // 🔹 OPERADOR
+      if (tipo === "operador") {
+        const total = await User.countDocuments({
+          empresaId,
+          role: "operador"
+        });
+
+        if (total >= limites.maxOperadores) {
+          return res.status(403).json({
+            success: false,
+            message: "Limite de operadores atingido"
+          });
+        }
+      }
+
+      next();
+
+    } catch (erro) {
+      res.status(500).json({
+        success: false,
+        message: erro.message
+      });
+    }
+  };
+};

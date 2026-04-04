@@ -1,29 +1,38 @@
-import express from "express"
-
+import express from "express";
 import {
   criarEstacionamento,
   buscarEstacionamento,
-  atualizarEstacionamento
-} from "../controllers/parkingController.js"
+  atualizarEstacionamento,
+  listarEstacionamentos
+} from "../controllers/parkingController.js";
+
 import {
   verificarToken
-} from "../middlewares/authMiddleware.js"
+} from "../middlewares/authMiddleware.js";
 import {
   verificarEmpresa
-} from "../middlewares/companyMiddleware.js"
+} from "../middlewares/companyMiddleware.js";
 import {
   permitir
 } from "../middlewares/roleMiddleware.js";
-import verifyPlan from "../middlewares/verifyPlan.js";
+import {
+  verifyPlan,
+  checkPlanLimits
+} from "../middlewares/verifyPlan.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.use(verificarToken, verificarEmpresa, verifyPlan)
+// 🔐 base de proteção
+router.use(verificarToken, verificarEmpresa, verifyPlan);
 
-router.post("/", permitir("admin"), criarEstacionamento);
+// 🚗 CRIAR (com limite)
+router.post("/", permitir("admin"), checkPlanLimits("parking"),
+  criarEstacionamento);
+
+// ✏️ UPDATE
 router.put("/:id", permitir("admin"), atualizarEstacionamento);
 
-// operador pode ver
+// 👁️ VER
 router.get("/:id", permitir("admin", "operador"), buscarEstacionamento);
-
-export default router
+router.get("/", permitir("admin", "operador"), listarEstacionamentos);
+export default router;

@@ -6,6 +6,7 @@ import {
   statusEmpresa,
   usoEmpresa
 } from "../controllers/companyController.js"
+
 import {
   verificarToken
 } from "../middlewares/authMiddleware.js";
@@ -15,22 +16,35 @@ import {
 import {
   permitir
 } from "../middlewares/roleMiddleware.js";
-import verifyPlan from "../middlewares/verifyPlan.js";
-
-
+import {verifyPlan} from "../middlewares/verifyPlan.js";
 
 const router = express.Router()
+
+// 🔐 LOGIN (global)
 router.use(verificarToken)
 
-//Rotas da Empresa
+// =====================
+// EMPRESA
+// =====================
+
+// criar empresa (sem verificarEmpresa)
 router.post("/", criarEmpresa)
+
+// status (precisa empresa)
 router.get("/status", verificarEmpresa, statusEmpresa)
 
-// só admin
-router.put("/", permitir("admin"), atualizarEmpresa);
-router.get("/", permitir("admin"), buscarEmpresa);
+// buscar empresa (admin)
+router.get("/", verificarEmpresa, permitir("admin"), buscarEmpresa)
 
-router.get("/uso", verificarToken, verificarEmpresa, verifyPlan, usoEmpresa
-);
+// atualizar empresa (admin)
+router.put("/", verificarEmpresa, permitir("admin"), atualizarEmpresa)
+
+// uso (SaaS) → precisa tudo
+router.get(
+  "/uso",
+  verificarEmpresa,
+  verifyPlan,
+  usoEmpresa
+)
 
 export default router;

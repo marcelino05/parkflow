@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="./company.css">
+  <link rel="stylesheet" href="../utils/global.css">
+  <link rel="stylesheet" href="../utils/toast.css">
+  <title>parkflow criar empresa </title>
+</head>
+<body>
+  <div class="empresa-container">
+    <div class="empresa-card">
+      
+      <div class="empresa-left">
+        
+        <h1>Crie sua empresa</h1>
+        
+        <p>Comece a gerir seus estacionamentos em minutos com o ParkFlow.</p>
+        
+        <ul>
+          <li><i class="bi bi-check2"></i> Gestão de vagas</li>
+          <li><i class="bi bi-check2"></i> Controle de entradas/saídas</li>
+          <li><i class="bi bi-check2"></i> Relatórios em tempo real</li>
+          <li><i class="bi bi-check2"></i> Cálculo automático de preços</li>
+          <li><i class="bi bi-check2"></i> Multi-estacionamento</li>
+          <li><i class="bi bi-check2"></i> Histórico completo</li>
+        </ul>
+      </div>
+      
+      <div class="empresa-right">
+        <form id="empresaForm">
+          
+          <h1 class="logo">Park<b style="color: #16A34A;">Flow</b></h1>
+          
+          <div class="input-group">
+            <input type="text" name="nome" id="name" placeholder="Nome da Empresa" />
+            <i class="bi bi-building"></i>
+          </div>
+          
+          <div class="input-group">
+            <input type="email" name="email" id="email" placeholder="Email" />
+            <i class="bi bi-envelope"></i>
+          </div>
+          
+          <div class="input-group">
+            <input type="text" name="telefone" id="phone" placeholder="Telefone" />
+            <i class="bi bi-telephone"></i>
+          </div>
+          
+          <div class="input-group">
+            <input type="text" name="endereco" id="address" placeholder="Endereço" />
+            <i class="bi bi-geo-alt"></i>
+          </div>
+          
+          <button type="submit" class="btn-primar">
+            Criar Empresa
+          </button>
+          
+          <p class="trial-info">
+            Você começa com um plano <strong>Trial gratuito</strong>
+          </p>
+          
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="module" src="./company.js"></script>
+<script src="../utils/global.js" defer></script>
+</html>

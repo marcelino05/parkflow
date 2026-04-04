@@ -14,7 +14,7 @@ const gerarToken = (usuario) => {
     },
     process.env.SECRET_KEY,
     {
-      expiresIn: "1d"
+      expiresIn: "12h"
     }
   );
 };

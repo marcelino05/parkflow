@@ -6,15 +6,16 @@
   --cor-alerta: #F59E0B;
   --cor-erro: #DC2626;
   
-  --fundo: #f4f4f4;
-  --card: #FFFFFF;
+  /* 🔥 MELHORIAS NO MODO CLARO */
+  --fundo: #f8fafc;
+  --card: #ffffff;
   --texto: #0F172A;
-  --borda: #E2E8F0;
-  --sub: #989898;
---nav: #FFFFFF7A;
+  --borda: #e5e7eb;
+  --sub: #64748b;
+  --nav: rgba(255, 255, 255, 0.85);
   
-  --sombra: 0 4px 10px rgba(0, 0, 0, 0.05);
-  --radius: 10px;
+  --sombra: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --radius: 12px;
 }
 
 /* MODO ESCURO */
@@ -23,9 +24,10 @@
   --card: #1E293B;
   --texto: #F1F5F9;
   --borda: #334155;
-  --nav: #00000063;
+  --sub: #94A3B8;
+  --nav: rgba(2, 6, 23, 0.9);
   
-  --sombra: 0 4px 10px rgba(0, 0, 0, 0.4);
+  --sombra: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 * {

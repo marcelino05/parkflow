@@ -1,0 +1,169 @@
+  .header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 15px;
+    box-sizing: var(--sombra);
+  }
+  
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.3em;
+  }
+  
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  
+  .input,
+  input i {
+    padding: 8px;
+    background: var(--borda);
+    border-radius: 10px;
+    color: var(--texto);
+    
+  }
+  
+  /* 📱 MOBILE */
+  @media (max-width: 600px) {
+    
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      width: 100%;
+      
+    }
+    
+    .input {
+      width: 100%;
+      order: 1;
+      margin-top: 5px;
+      font-size: .90rem;
+      font-weight: 500;
+    }
+    
+    #themeBtn {
+      order: 2;
+    }
+    
+  }
+  nav{
+    padding-top: 50px;
+  }
+  
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  
+  .cards .icon {
+    font-size: 1.2em;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .cards h2 {
+    font-size: 1.5em;
+  }
+  
+  .cards .card {
+    padding: 10px 15px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+  }
+  
+  @media screen and (min-width: 768px) {
+    .right {
+      margin-right: 30px;
+    }
+    
+    .input {
+      width: 300px;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    
+  }
+  
+  .control-panel {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    margin-top: 15px;
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    align-items: center;
+  }
+  
+  /* INPUTS */
+  .inputs {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+  }
+  
+  /* INPUT BOX */
+  .input-box {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+  }
+  
+  /* INPUT */
+  .input-box input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    background: var(--bg);
+    color: var(--texto);
+  }
+  
+  /* ÍCONE */
+  .input-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+  }
+  
+  /* BOTÃO */
+  #btn-add {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .control-panel {
+      flex-direction: column;
+    }
+    
+    .inputs {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    #btn-add {
+      width: 100%;
+    }
+  }

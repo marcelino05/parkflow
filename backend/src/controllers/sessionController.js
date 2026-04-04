@@ -14,62 +14,65 @@ export const registrarEntrada = async (req, res) => {
       estacionamentoId
     } = req.body;
 
-    // Validação
     if (!placa?.trim() || !estacionamentoId) {
       return res.status(400).json({
-        success: false, message: "Placa e estacionamentoId são obrigatórios"
+        success: false,
+        message: "Placa e estacionamentoId são obrigatórios"
       });
     }
-    if (placa.length < 5) {
-      return res.status(400).json({
-        success: false, message: "Placa inválida"
-      })
-    }
 
-    const estacionamento = await Parking.findById(estacionamentoId);
+    const estacionamento = await Parking.findOne({
+      _id: estacionamentoId,
+      empresaId: req.empresaId
+    });
 
-    if (!estacionamento || estacionamento.empresaId.toString() !== req.empresaId.toString()) {
+    if (!estacionamento) {
       return res.status(403).json({
         success: false,
         message: "Estacionamento inválido"
       });
     }
 
-    const ativo = await ParkingSession.countDocuments({
+    // CONTAR CARROS ATIVOS (CORRETO)
+    const carrosAtivos = await ParkingSession.countDocuments({
       estacionamentoId,
+      empresaId: req.empresaId,
       status: "ativo"
-    })
+    });
 
-    if (ativo >= estacionamento.totalVaga) {
+    if (carrosAtivos >= estacionamento.totalVaga) {
       return res.status(400).json({
-        success: false, message: "estacionamento lotado"
-      })
+        success: false,
+        message: "Estacionamento lotado"
+      });
     }
 
     const sessaoAtiva = await ParkingSession.findOne({
-      placa: placa.toUpperCase().trim(),
+      placa: placa.trim().toUpperCase(),
       status: "ativo",
       empresaId: req.empresaId
-    })
+    });
 
     if (sessaoAtiva) {
       return res.status(400).json({
-        success: "false",
+        success: false,
         message: "Este carro já está no estacionamento"
-      })
+      });
     }
-
-    // Criar registro
+   
     const sessao = await ParkingSession.create({
       placa: placa.trim().toUpperCase(),
       estacionamentoId,
       empresaId: req.empresaId,
-      operadorId: req.usuarioId, // 👈 AQUI
-      horaEntrada: new Date()
+      operadorId: req.usuarioId,
+      horaEntrada: new Date(),
+      status: "ativo",
+
     });
 
     res.status(201).json({
-      success: true, sessao
+      success: true,
+      sessao
     });
 
     await criarLog( {
@@ -85,11 +88,11 @@ export const registrarEntrada = async (req, res) => {
 
   } catch (erro) {
     res.status(500).json({
-      success: false, message: "Erro ao registrar entrada: " + erro.message
+      success: false,
+      message: "Erro ao registrar entrada: " + erro.message
     });
   }
 };
-
 //*************LinkWa_parkflow*************
 // =>REGISTRAR SAIDA DE CARROS
 //*****************************************
@@ -102,54 +105,48 @@ export const registrarSaida = async (req, res) => {
 
     if (!sessaoId) {
       return res.status(400).json({
-        success: false, message: "sessaoId é obrigatório"
-      });
-    }
-
-    if (valorCobrado != null && (isNaN(Number(valorCobrado)) || Number(valorCobrado) < 0)) {
-      return res.status(400).json({
-        success: false, message: "valorCobrado inválido"
+        success: false,
+        message: "sessaoId é obrigatório"
       });
     }
 
     const sessao = await ParkingSession.findById(sessaoId);
-    if (!sessao) return res.status(404).json({
-      success: false, message: "Sessão não encontrada"
-    });
 
-    if (sessao.empresaId.toString() !== req.empresaId.toString()) {
-      return res.status(403).json({
-        success: false, message: "Acesso negado"
+    if (!sessao) {
+      return res.status(404).json({
+        success: false,
+        message: "Sessão não encontrada"
       });
     }
 
     if (sessao.status === "finalizado") {
       return res.status(400).json({
-        success: false, message: "Sessão já finalizada"
+        success: false,
+        message: "Sessão já finalizada"
       });
     }
 
-    const estacionamento = await Parking.findById(sessao.estacionamentoId);
-    if (!estacionamento) return res.status(404).json({
-      success: false, message: "Estacionamento não encontrado"
+    const estacionamento = await Parking.findOne({
+      _id: sessao.estacionamentoId,
+      empresaId: req.empresaId
     });
 
-    const horaSaida = new Date();
-    const horaEntrada = new Date(sessao.horaEntrada);
-    const tempoMs = horaSaida - horaEntrada;
-
-    if (isNaN(tempoMs)) {
-      return res.status(400).json({
-        success: false, message: "Hora de entrada inválida"
+    if (!estacionamento) {
+      return res.status(404).json({
+        success: false,
+        message: "Estacionamento não encontrado"
       });
     }
 
-    const preco = Number(estacionamento.precoPorHora);
-    const horas = Math.ceil(tempoMs / (1000 * 60 * 60));
+    const horaSaida = new Date();
+    const tempoMs = horaSaida - new Date(sessao.horaEntrada);
 
-    // Se o valorCobrado foi enviado e válido, usa ele; senão calcula se o preço estiver definido
-    const valorFinal = (valorCobrado != null)
-    ? Number(valorCobrado): (!isNaN(preco) ? horas * preco: 0); // se preço inválido, coloca 0
+    const horas = Math.ceil(tempoMs / (1000 * 60 * 60));
+    const preco = Number(estacionamento.precoPorHora);
+
+    const valorFinal =
+    valorCobrado != null
+    ? Number(valorCobrado): (!isNaN(preco) ? horas * preco: 0);
 
     sessao.horaSaida = horaSaida;
     sessao.valorCobrado = valorFinal;
@@ -174,17 +171,18 @@ export const registrarSaida = async (req, res) => {
       entidade: "sessao",
       entidadeId: sessao._id,
       detalhes: {
-        valor: valorFinal,
-        horas
+        valor: valorFinal, horas
       }
     });
 
   } catch (erro) {
     res.status(500).json({
-      success: false, message: "Erro ao registrar saída: " + erro.message
+      success: false,
+      message: "Erro ao registrar saída: " + erro.message
     });
   }
 };
+
 //*************LinkWa_parkflow*************
 // =>LISTAR HISTÓRICO
 //*****************************************
@@ -240,48 +238,56 @@ export const vagasDisponiveis = async (req, res) => {
   try {
     const {
       estacionamentoId
-    } = req.params
+    } = req.params;
 
     const estacionamento = await Parking.findOne({
       _id: estacionamentoId,
       empresaId: req.empresaId
     });
+
     if (!estacionamento) {
       return res.status(400).json({
-        success: false, message: "Estacionamento não encontrado"
-      })
+        success: false,
+        message: "Estacionamento não encontrado"
+      });
     }
-    //verificar vagas ativas
-    const ativos = await ParkingSession.countDocuments({
-      empresaId: req.empresaId,
+
+    // 🔥 CONTAGEM REAL (CORRETO)
+    const carrosAtivos = await ParkingSession.countDocuments({
       estacionamentoId,
       status: "ativo"
     });
 
-    const vagas = Math.max(0, estacionamento.totalVaga - ativos);
+    const vagasDisponiveis = Math.max(
+      0,
+      estacionamento.totalVaga - carrosAtivos
+    );
 
     res.json({
       success: true,
       totalVagas: estacionamento.totalVaga,
-      ocupadas: ativos,
-      vagasDisponiveis: vagas
-    })
+      carrosAtivos,
+      vagasDisponiveis
+    });
 
   } catch (erro) {
-    return res.status(500).json({
-      success: false, message: "Erro ao calcular vagas"
-    })
+    res.status(500).json({
+      success: false,
+      message: "Erro ao calcular vagas"
+    });
   }
-}
+};
 
 //*************LinkWa_parkflow*************
 // =>RECEITA TOTAL
 //*****************************************
 export const receitaTotal = async (req, res) => {
   try {
+    const empresaId = new mongoose.Types.ObjectId(req.empresaId);
+
     const resultado = await ParkingSession.aggregate([{
       $match: {
-        empresaId: req.empresaId,
+        empresaId: empresaId,
         status: "finalizado"
       }
     },
@@ -304,10 +310,11 @@ export const receitaTotal = async (req, res) => {
   } catch (erro) {
     res.status(500).json({
       success: false,
-      message: "Erro ao calcular receita"
+      message: "Erro ao calcular receita: " + erro.message
     });
   }
 };
+
 //*************LinkWa_parkflow*************
 // => DASHBOARD COMPLETO
 //*****************************************
@@ -316,36 +323,44 @@ export const dashboard = async (req, res) => {
   try {
     const empresaId = req.empresaId;
 
-    // ===== HOJE =====
+    // 🔥 carros ativos REAIS
+    const carrosAtivos = await ParkingSession.countDocuments({
+      empresaId,
+      status: "ativo"
+    });
+
+    const estacionamentos = await Parking.find({
+      empresaId
+    });
+
+    let totalVagas = 0;
+
+    for (const est of estacionamentos) {
+      totalVagas += est.totalVaga || 0;
+    }
+
+    const vagasDisponiveis = Math.max(0, totalVagas - carrosAtivos);
+
+    // HOJE
     const hojeInicio = new Date();
     hojeInicio.setHours(0, 0, 0, 0);
 
     const hojeFim = new Date();
     hojeFim.setHours(23, 59, 59, 999);
 
-    // ===== CARROS ATIVOS =====
-    const carrosAtivos = await ParkingSession.countDocuments({
-      empresaId,
-      status: "ativo"
-    });
-
-    // ===== ENTRADAS HOJE =====
     const entradasHoje = await ParkingSession.countDocuments({
       empresaId,
       horaEntrada: {
-        $gte: hojeInicio,
-        $lte: hojeFim
+        $gte: hojeInicio, $lte: hojeFim
       }
     });
 
-    // ===== RECEITA HOJE =====
     const receitaHojeAgg = await ParkingSession.aggregate([{
       $match: {
         empresaId,
         status: "finalizado",
         horaSaida: {
-          $gte: hojeInicio,
-          $lte: hojeFim
+          $gte: hojeInicio, $lte: hojeFim
         }
       }
     },
@@ -360,36 +375,14 @@ export const dashboard = async (req, res) => {
 
     const receitaHoje = receitaHojeAgg[0]?.total || 0;
 
-    // ===== VAGAS DISPONÍVEIS (TODOS ESTACIONAMENTOS) =====
-    const estacionamentos = await Parking.find({
-      empresaId
-    });
-
-    let totalVagas = 0;
-    let totalOcupadas = 0;
-
-    for (const est of estacionamentos) {
-      totalVagas += est.totalVaga;
-
-      const ocupadas = await ParkingSession.countDocuments({
-        empresaId,
-        estacionamentoId: est._id,
-        status: "ativo"
-      });
-
-      totalOcupadas += ocupadas;
-    }
-
-    const vagasDisponiveis = Math.max(0, totalVagas - totalOcupadas);
-
-    // ===== RESPOSTA FINAL =====
     res.json({
       success: true,
       dados: {
         receitaHoje,
         carrosAtivos,
         entradasHoje,
-        vagasDisponiveis
+        vagasDisponiveis,
+        totalVagas
       }
     });
 
@@ -400,7 +393,6 @@ export const dashboard = async (req, res) => {
     });
   }
 };
-
 
 //*************LinkWa_parkflow*************
 // => receita Por Periodo COMPLETO
@@ -424,9 +416,11 @@ export const receitaPorPeriodo = async (req, res) => {
       });
     }
 
+    const empresaId = new mongoose.Types.ObjectId(req.empresaId);
+
     const resultado = await ParkingSession.aggregate([{
       $match: {
-        empresaId: req.empresaId,
+        empresaId: empresaId,
         status: "finalizado",
         horaSaida: {
           $gte: dataInicio
@@ -472,8 +466,6 @@ export const receitaPorPeriodo = async (req, res) => {
   }
 };
 
-
-
 //*************LinkWa_parkflow*************
 // => receita Por hora COMPLETO
 //*****************************************
@@ -492,7 +484,10 @@ export const entradasPorHora = async (req, res) => {
         $group: {
           _id: {
             hora: {
-              $hour: "$horaEntrada"
+              $hour: {
+                date: "$horaEntrada",
+                timezone: "Africa/Maputo"
+              }
             }
           },
           total: {
@@ -514,7 +509,7 @@ export const entradasPorHora = async (req, res) => {
   } catch (erro) {
     res.status(500).json({
       success: false,
-      message: "Erro ao calcular entradas por hora"
+      message: "Erro ao calcular entradas por hora: " + erro.message
     });
   }
 };

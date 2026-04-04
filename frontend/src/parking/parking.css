@@ -1,0 +1,294 @@
+.main{
+  background: var(--borda);
+  height: 90vh;
+}
+@media screen and (min-width: 768px) {
+  .main{
+    height: 78vh;
+  }
+}
+/* =========================
+   CONTAINER
+========================= */
+.parking-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.parking-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.parking-topbar h1 {
+  font-size: 24px;
+}
+
+/* =========================
+   BOTÃO
+========================= */
+.parking-btn {
+  background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-hover));
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  
+  transition: all 0.2s ease;
+}
+
+.parking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.parking-btn:active {
+  transform: scale(0.97);
+}
+
+.parking-btn.cancel {
+  background: #ef4444;
+}
+
+/* =========================
+   GRID
+========================= */
+.parking-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 15px;
+}
+
+/* =========================
+   CARD
+========================= */
+.parking-card-item {
+  background: var(--card);
+  padding: 18px;
+  border-radius: 16px;
+  
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+  
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.parking-card-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-color: var(--cor-primaria);
+}
+/* =========================
+   HEADER CARD
+========================= */
+.parking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.parking-name {
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.parking-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.parking-status.ativo {
+  background: #10b981;
+  color: #fff;
+}
+
+.parking-status.inativo {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* =========================
+   INFO
+========================= */
+.parking-location,
+.parking-created {
+  font-size: 14px;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+  gap: 8px;
+}
+
+/* =========================
+   STATS
+========================= */
+.parking-stats {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.parking-box {
+  background: var(--fundo);
+  padding: 10px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid var(--borda);
+  transition: 0.2s;
+}
+
+.parking-box:hover {
+  transform: scale(1.03);
+}
+
+/* =========================
+   PROGRESS BAR
+========================= */
+.progress {
+  height: 8px;
+  background: #eee;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 20px;
+  transition: width 0.4s ease;
+}
+
+/* =========================
+   MODAL
+========================= */
+.parking-modal {
+  padding: 20px;
+  position: fixed;
+  inset: 0;
+  
+  align-items: center;
+  justify-content: center;
+  
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  
+  z-index: 9999;
+  display: none;
+}
+
+.parking-modal.show {
+  display: flex;
+}
+
+.parking-modal-content {
+  background: var(--card);
+  padding: 25px;
+  border-radius: 14px;
+  min-width: 380px;
+  max-width: 500px;
+  
+  animation: fadeInUp 0.3s ease;
+  box-shadow: var(--sombra);
+}
+
+.parking-modal-content h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   ANIMAÇÃO MODAL
+========================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   INPUT GROUP
+========================= */
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  background: transparent;
+  color: var(--texto);
+  
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.input-group i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sub);
+}
+
+/* =========================
+   BOTÕES MODAL
+========================= */
+.parking-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.parking-btns button {
+  width: 48%;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+@media (max-width: 1024px) {
+  .parking-topbar h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .parking-card-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .parking-container {
+    padding: 15px;
+  }
+}
