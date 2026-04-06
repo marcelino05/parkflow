@@ -1,5 +1,5 @@
 .main{
-  background: var(--borda);
+  background: var(--fundo);
   height: 90vh;
 }
 @media screen and (min-width: 768px) {

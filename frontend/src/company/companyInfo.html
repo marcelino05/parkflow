@@ -52,84 +52,133 @@
     </header>
     
     <!-- CONTENT -->
-   <main class="main">
-  <div class="top-info">
-    <h2>Informações da empresa </h2>
-    <p><a href="./company.html"><button>Criar empresa</button></a></p>
-  </div>
-  <section class="company-section">
-    
-    <!-- INFORMAÇÕES DA EMPRESA -->
-    <div class="company-card">
+    <main class="main">
       
-      <div class="company-header">
-        <h2 id="companyName">---</h2>
-        <span id="companyPlan" class="plan"></span>
+      <div class="top-info">
+        <h2>Informações da empresa </h2>
+        <p><a href="./company.html"><button>Criar empresa</button></a></p>
       </div>
-      
-      <div class="company-info">
-        <p><strong>Proprietário:</strong> <span id="companyOwner">---</span></p>
+      <section class="company-section">
         
-        <p><strong>Email:</strong> <span id="companyEmail"></span></p>
-        <p><strong>Telefone:</strong> <span id="companyPhone"></span></p>
-        <p><strong>Endereço:</strong> <span id="companyAddress"></span></p>
-      </div>
-      
-    </div>
-    
-    <!-- PLANO -->
-    <div class="company-card">
-      
-      <h3>Plano</h3>
-      
-      <p><strong>Ativo:</strong> <span id="companyPlanoAtivo"></span></p>
-      
-      <p><strong>Data de início:</strong> <span id="companyPlanoInicio"></span></p>
-      
-      <p><strong>Expira em:</strong> <span id="companyPlanoFim"></span></p>
-      
-      <p><strong>Criado em:</strong> <span id="companyCreated"></span></p>
-      
-    </div>
-    
-    <!-- LIMITES -->
-    <div class="company-card">
-      
-      <h3>Limites</h3>
-      
-      <div class="limit">
-        <span>Estacionamentos</span>
-        <div class="bar">
-          <div id="barParking" class="progress"></div>
+        <!-- INFORMAÇÕES DA EMPRESA -->
+        <div class="company-card">
+          
+          <div class="company-header">
+            <div class="left">
+              <h2 id="companyName">---</h2>
+            </div>
+            
+            <div class="right">
+              <button id="btnEditCompany" class="edit-btn">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="company-info">
+            <p><strong>Proprietário:</strong> <span id="companyOwner">---</span></p>
+            
+            <p><strong>Email:</strong> <span id="companyEmail"></span></p>
+            <p><strong>Telefone:</strong> <span id="companyPhone"></span></p>
+            <p><strong>Endereço:</strong> <span id="companyAddress"></span></p>
+          </div>
+          
         </div>
-        <small id="textParking"></small>
-      </div>
-      
-      <div class="limit">
-        <span>Operadores</span>
-        <div class="bar">
-          <div id="barOperators" class="progress"></div>
+        
+        <!-- PLANO -->
+        <div class="company-card">
+          <h3>Plano</h3>
+          
+          <p><strong>Plano:</strong> <span id="companyPlanoNome"></span></p>
+          
+          <p><strong>Status:</strong> <span id="companyPlanoAtivo"></span></p>
+          
+          <p><strong>Dias restantes:</strong> <span id="companyDiasRestantes"></span></p>
+          
+          <p><strong>Data de início:</strong> <span id="companyPlanoInicio"></span></p>
+          
+          <p><strong>Expira em:</strong> <span id="companyPlanoFim"></span></p>
         </div>
-        <small id="textOperators"></small>
-      </div>
-      
-      <div class="limit">
-        <span>Vagas</span>
-        <div class="bar">
-          <div id="barSpots" class="progress"></div>
+        
+        <!-- LIMITES -->
+        <div class="company-card">
+          
+          <h3>Limites</h3>
+          
+          <div class="limit">
+            <span>Estacionamentos</span>
+            <div class="bar">
+              <div id="barParking" class="progress"></div>
+            </div>
+            <small id="textParking"></small>
+          </div>
+          
+          <div class="limit">
+            <span>Operadores</span>
+            <div class="bar">
+              <div id="barOperators" class="progress"></div>
+            </div>
+            <small id="textOperators"></small>
+          </div>
+          
+          <div class="limit">
+            <span>Vagas</span>
+            <div class="bar">
+              <div id="barSpots" class="progress"></div>
+            </div>
+            <small id="textSpots"></small>
+          </div>
+          
         </div>
-        <small id="textSpots"></small>
+        
+      </section>
+      
+      <!-- MODAL EDITAR EMPRESA -->
+      <div class="parking-modal" id="companyModal">
+        
+        <div class="parking-modal-content">
+          
+          <h2>Editar Empresa</h2>
+          
+          <div class="input-group">
+            <input type="text" id="inputName" placeholder="Nome da empresa">
+            <i class="bi bi-building"></i>
+          </div>
+          <span id="errorName" class="error"></span>
+          
+          <div class="input-group">
+            <input type="email" id="inputEmail" placeholder="Email">
+            <i class="bi bi-envelope"></i>
+          </div>
+          <span id="errorEmail" class="error"></span>
+          
+          <div class="input-group">
+            <input type="text" id="inputPhone" placeholder="Telefone">
+            <i class="bi bi-telephone"></i>
+          </div>
+          <span id="errorPhone" class="error"></span>
+          
+          <div class="input-group">
+            <input type="text" id="inputAddress" placeholder="Endereço">
+            <i class="bi bi-geo-alt"></i>
+          </div>
+          <span id="errorAddress" class="error"></span>
+          
+          <div class="parking-btns">
+            <button class="parking-btn cancel" id="btnCancel">Cancelar</button>
+            <button class="parking-btn" id="btnSave">Salvar</button>
+          </div>
+          
+        </div>
+        
       </div>
       
-    </div>
-    
-  </section>
-  
-</main>
+    </main>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="./companyInfo.js" defer></script>
   <script src="../utils/global.js" defer></script>
 </body>
+
 </html>

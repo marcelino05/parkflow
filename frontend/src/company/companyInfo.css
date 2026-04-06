@@ -1,5 +1,5 @@
 main{
-  background: var(--borda);
+  background: var(--fundo);
 
 }
 .company-section {
@@ -27,7 +27,26 @@ main{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+}
+
+.company-header .left {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--cor-primaria);
+  padding: 8px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  background: rgba(37, 99, 235, 0.1);
 }
 
 .company-card h3{
@@ -36,7 +55,7 @@ main{
 
 /* INFO */
 .company-info p {
-  margin: 8px 0;
+  margin: 10px 0;
   color: var(--texto);
 }
 
@@ -92,4 +111,186 @@ main{
 
 small {
   color: var(--sub);
+}
+
+/* =========================
+   MODAL
+========================= */
+.parking-modal {
+  position: fixed;
+  inset: 0;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+
+  z-index: 9999;
+  padding: 20px;
+}
+
+.parking-modal.show {
+  display: flex;
+}
+
+/* =========================
+   CONTEÚDO
+========================= */
+.parking-modal-content {
+  background: var(--card);
+  padding: 25px;
+  border-radius: 16px;
+
+  width: 100%;
+  max-width: 420px;
+
+  box-shadow: var(--sombra);
+
+  animation: fadeInUp 0.3s ease;
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* TÍTULO */
+.parking-modal-content h2 {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   ANIMAÇÃO
+========================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   INPUT GROUP
+========================= */
+.input-group {
+  position: relative;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+
+  background: transparent;
+  color: var(--texto);
+
+  transition: 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* ÍCONE NO INPUT */
+.input-group i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  color: var(--sub);
+  font-size: 14px;
+}
+
+/* =========================
+   BOTÕES
+========================= */
+.parking-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.parking-btns button {
+  flex: 1;
+}
+
+/* BOTÃO PADRÃO */
+.parking-btn {
+  background: linear-gradient(
+    135deg,
+    var(--cor-primaria),
+    var(--cor-primaria-hover)
+  );
+
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+
+  border: none;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.parking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.parking-btn:active {
+  transform: scale(0.97);
+}
+
+/* BOTÃO CANCELAR */
+.parking-btn.cancel {
+  background: #ef4444;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+@media (max-width: 480px) {
+  .parking-modal-content {
+    padding: 20px;
+  }
+
+  .parking-modal-content h2 {
+    font-size: 18px;
+  }
+  
+  
+}.sucesso {
+  background: var(--cor-sucesso);
+  color: #fff;
+  padding: 1px 10px;
+  border-radius: 999px;
+}
+
+.erro {
+  background: var(--cor-erro);
+  color: #fff;
+  padding: 1px 10px;
+  border-radius: 999px;
+}
+
+.alerta-laranja {
+  color: var(--cor-alerta);
+  font-weight: bold;
+}
+
+.alerta-vermelho {
+  color: var(--cor-erro);
+  font-weight: bold;
 }

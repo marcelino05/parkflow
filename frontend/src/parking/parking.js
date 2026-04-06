@@ -1,4 +1,4 @@
-import { createToast, updateToast } from "../utils/toast.js";
+import { createToast, updateToast, removeToast, confirmarToast } from "../utils/toast.js"
 
 /* =========================
    TOKEN
@@ -42,6 +42,8 @@ let editId = null;
 function abrirModal(titulo = "Novo Parque") {
   modal.style.display = "flex";
   modalTitle.textContent = titulo;
+  
+  btnSalvar.textContent = editId ? "Atualizar" : "Salvar";
 }
 
 function fecharModal() {
@@ -70,9 +72,11 @@ async function listar() {
     });
     
     const data = await res.json();
+    
     if (!res.ok) {
-      throw new Error(data.message || "Erro ao criar buscar  estacionamento");
+      throw new Error(data.message || "Erro ao buscar estacionamento");
     }
+    
     const lista = data.estacionamentos || [];
     
     cardList.innerHTML = "";
@@ -93,19 +97,18 @@ async function listar() {
         item.ativo || "ativo";
       
       card.querySelector(".parking-vagas").textContent = item.totalVaga || 0;
-      card.querySelector(".parking-disponivel").textContent =
-        item.vagasDisponiveis || 0
+      card.querySelector(".parking-disponivel").textContent = item.vagasDisponiveis || 0;
       card.querySelector(".parking-preco").textContent = item.precoPorHora || 0;
       card.querySelector(".parking-receita").textContent = item.receita || 0;
       
       /* EDITAR */
       card.querySelector(".parking-edit-btn").onclick = () => {
-        editId = item.id;
+        editId = item._id; // ✅ CORRETO
         
         nome.value = item.nome;
         endereco.value = item.endereco;
-        vagas.value = item.vagas;
-        preco.value = item.preco;
+        vagas.value = item.totalVaga;
+        preco.value = item.precoPorHora;
         
         abrirModal("Editar Parque");
       };
@@ -141,9 +144,8 @@ async function criar() {
     
     const data = await res.json();
     
-    /* 🔴 VERIFICA ERRO DO BACKEND */
     if (!res.ok) {
-      throw new Error(data.message || "Erro ao criar Estaciomento");
+      throw new Error(data.message || "Erro ao criar estacionamento");
     }
     
     updateToast(toastId, "Criado com sucesso", "sucesso");
@@ -161,10 +163,20 @@ async function criar() {
    EDITAR
 ========================= */
 async function editar() {
-  const toastId = createToast("A atualizar...", "info");
   
   try {
-    await fetch(`${API}/${editId}`, {
+    if (!editId) {
+      throw new Error("ID inválido para edição");
+    }
+    
+    const confirmou = await confirmarToast("Deseja atualizar este parque?");
+
+if (!confirmou) return;
+  const toastId = createToast("A atualizar...", "info");
+
+editar();
+    
+    const res = await fetch(`${API}/${editId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -173,24 +185,27 @@ async function editar() {
       body: JSON.stringify({
         nome: nome.value,
         endereco: endereco.value,
-        vagas: Number(vagas.value),
-        preco: Number(preco.value)
+        totalVaga: Number(vagas.value),
+        precoPorHora: Number(preco.value)
       })
     });
     
+    const data = await res.json();
+    
     if (!res.ok) {
-      throw new Error(data.message || "Erro ao  atualizar estacionamento");
+      throw new Error(data.message || "Erro ao atualizar");
     }
     
     updateToast(toastId, "Atualizado com sucesso", "sucesso");
     
     fecharModal();
-    editId = null;
     limpar();
+    editId = null;
+    
     listar();
     
   } catch (err) {
-    updateToast(toastId, err.message || "Erro ao atualizar", "erro");
+    updateToast(toastId, err.message, "erro");
   }
 }
 
@@ -208,12 +223,51 @@ btnCancelar.onclick = () => {
 };
 
 btnSalvar.onclick = () => {
+  if (!validarCampos()) return;
+  
   if (editId) {
     editar();
   } else {
     criar();
   }
 };
+
+/* =========================
+   VALIDAÇÃO
+========================= */
+function validarCampos() {
+  const erros = [];
+  
+  const nomeVal = nome.value.trim();
+  const enderecoVal = endereco.value.trim();
+  const vagasVal = Number(vagas.value);
+  const precoVal = Number(preco.value);
+  
+  if (!nomeVal) {
+    erros.push("Nome é obrigatório");
+  } else if (nomeVal.length < 3) {
+    erros.push("Nome deve ter pelo menos 3 caracteres");
+  }
+  
+  if (!enderecoVal) {
+    erros.push("Endereço é obrigatório");
+  }
+  
+  if (!vagas.value || isNaN(vagasVal) || vagasVal <= 0) {
+    erros.push("Vagas deve ser maior que 0");
+  }
+  
+  if (!preco.value || isNaN(precoVal) || precoVal <= 0) {
+    erros.push("Preço deve ser maior que 0");
+  }
+  
+  if (erros.length > 0) {
+    createToast(erros[0], "erro");
+    return false;
+  }
+  
+  return true;
+}
 
 /* =========================
    INICIAR
