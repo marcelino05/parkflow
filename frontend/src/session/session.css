@@ -1,169 +1,335 @@
-  .header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    height: auto;
-    padding: 15px;
-    box-sizing: var(--sombra);
-  }
-  
-  .left {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 1.3em;
-  }
-  
+/* =========================
+   HEADER (NÃO ALTERAR)
+========================= */
+.header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  height: auto;
+  padding: 15px;
+  box-sizing: var(--sombra);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.3em;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.right .input{
+  padding: 10px;
+}
+
+.input,
+input i {
+  padding: 8px;
+  background: var(--borda);
+  border-radius: 10px;
+  color: var(--texto);
+}
+
+@media (max-width: 600px) {
   .right {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-left: auto;
-  }
-  
-  .input,
-  input i {
-    padding: 8px;
-    background: var(--borda);
-    border-radius: 10px;
-    color: var(--texto);
-    
-  }
-  
-  /* 📱 MOBILE */
-  @media (max-width: 600px) {
-    
-    .right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-      width: 100%;
-      
-    }
-    
-    .input {
-      width: 100%;
-      order: 1;
-      margin-top: 5px;
-      font-size: .90rem;
-      font-weight: 500;
-    }
-    
-    #themeBtn {
-      order: 2;
-    }
-    
-  }
-  nav{
-    padding-top: 50px;
-  }
-  
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
-  }
-  
-  .cards .icon {
-    font-size: 1.2em;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .cards h2 {
-    font-size: 1.5em;
-  }
-  
-  .cards .card {
-    padding: 10px 15px;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-  }
-  
-  @media screen and (min-width: 768px) {
-    .right {
-      margin-right: 30px;
-    }
-    
-    .input {
-      width: 300px;
-      padding: 10px;
-      font-size: 1rem;
-    }
-    
-  }
-  
-  .control-panel {
-    display: flex;
-    gap: 15px;
-    padding: 15px;
-    margin-top: 15px;
-    background: var(--card);
-    border: 1px solid var(--borda);
-    border-radius: 12px;
-    align-items: center;
-  }
-  
-  /* INPUTS */
-  .inputs {
-    display: flex;
-    gap: 10px;
-    flex: 1;
-  }
-  
-  /* INPUT BOX */
-  .input-box {
-    position: relative;
-    flex: 1;
-    min-width: 180px;
-  }
-  
-  /* INPUT */
-  .input-box input {
     width: 100%;
-    padding: 12px 40px 12px 12px;
+  }
+
+  .input {
+    width: 100%;
+    order: 1;
+    margin-top: 5px;
+    font-size: .90rem;
+    font-weight: 500;
+    padding: 0;
+  }
+
+  #themeBtn {
+    order: 2;
+  }
+}
+
+/* =========================
+   CARDS (NÃO ALTERAR)
+========================= */
+.main section.cards {
+  margin-bottom: 20px;
+}
+
+.cards .active {
+  background: linear-gradient(135deg, #16A34A, #15803d);
+}
+
+.cards .entry {
+  background: linear-gradient(135deg, #2563EB, #1d4ed8);
+}
+
+.cards .available {
+  background: linear-gradient(135deg, #F59E0B, #d97706);
+}
+
+.activities {
+  width: 100%;
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 18px;
+  background: var(--bg);
+}
+
+/* TÍTULO */
+.activities h2 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* =========================
+   TABS (Entrada / Saída)
+========================= */
+.activity-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  background: transparent;
+  color: var(--texto);
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab:hover {
+  background: var(--borda);
+}
+
+.tab.active {
+  background: var(--cor-primaria);
+  color: #fff;
+  border-color: var(--cor-primaria);
+}
+
+/* =========================
+   INPUT + BOTÃO
+========================= */
+.activity {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* INPUT MODERNO */
+.input-group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--borda);
+  padding: 10px 12px;
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.input-group:focus-within {
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.input-group i {
+  color: var(--texto);
+  opacity: 0.6;
+}
+
+.input-group input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--texto);
+  font-size: 0.95rem;
+}
+
+/* BOTÃO */
+#btnAction {
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--cor-primaria);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+#btnAction:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+#btnAction:active {
+  transform: scale(0.98);
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.empty {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--texto);
+  opacity: 0.6;
+}
+
+.empty i {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* =========================
+   LISTA DE SESSÕES
+========================= */
+.list-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* CARD */
+.session-card {
+  background: var(--card);
+  border: 1px solid var(--borda);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+}
+
+.session-card:hover {
+  transform: translateY(-2px);
+}
+
+/* INFO */
+.session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-info strong {
+  font-size: 0.95rem;
+}
+
+.session-info span {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* BADGE */
+.badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  background: var(--cor-sucesso);
+  color: #fff;
+  width: fit-content;
+}
+
+/* BOTÃO SAÍDA */
+.session-actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: var(--cor-erro);
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 600px) {
+  
+  .activities {
+    padding: 12px;
+  }
+  
+  /* TABS mais compactas */
+  .activity-tabs {
+    flex-direction: row;
+  }
+  
+  .tab {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+  
+  /* 🔥 INPUT MAIS FINO E MODERNO */
+  .activity {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .input-group {
+    padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid var(--borda);
-    background: var(--bg);
-    color: var(--texto);
   }
   
-  /* ÍCONE */
-  .input-box i {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0.6;
+  .input-group input {
+    font-size: 0.85rem;
   }
   
-  /* BOTÃO */
-  #btn-add {
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: none;
-    background: var(--accent);
-    color: #000;
-    font-weight: 600;
-    cursor: pointer;
+  .input-group i {
+    font-size: 0.9rem;
+}
+  
+  /* BOTÃO mais elegante */
+  #btnAction {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+    justify-content: center;
   }
   
-  /* MOBILE */
-  @media (max-width: 600px) {
-    .control-panel {
-      flex-direction: column;
-    }
-    
-    .inputs {
-      flex-direction: column;
-      width: 100%;
-    }
-    
-    #btn-add {
-      width: 100%;
-    }
+  /* CARD mais leve */
+  .session-card {
+    padding: 10px;
+    font-size: 0.85rem;
   }
+  
+  .session-actions button {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+}

@@ -20,14 +20,30 @@
     <h2 class="logo">Park<b>Flow</b></h2>
     
     <nav>
-      <a href="../dashboard/dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
-      <a href="./sessao.html"><i class="bi bi-car-front"></i> Sessões</a>
-      <a href="../parking/parking.html" id="menuParking"><i class="bi bi-p-square"></i> Estacionamento</a>
-      <a href="#"><i class="bi bi-person"></i> Operadores</a>
-      <a href="../company/companyInfo.html"><i class="bi bi-buildings"></i>Empresa</a>
-      <a href="../company/companyInfo.html"><i class="bi bi-buildings"></i>Empresa</a>
-      <a href="#"><i class="bi bi-clock-history"></i> Histórico</a>
-      <a href="#"><i class="bi bi-gear"></i> Configurações</a>
+      <a href="../dashboard/dashboard.html">
+        <i class="bi bi-speedometer2"></i>Dashboard
+      </a>
+      <a href="./sessao.html">
+        <i class="bi bi-car-front"></i>Sessões
+      </a>
+      <a href="../parking/parking.html" id="menuParking">
+        <i class="bi bi-p-square"></i> Estacionamento
+      </a>
+      <a href="#">
+        <i class="bi bi-person"></i> Operadores
+      </a>
+      <a href="../company/companyInfo.html">
+        <i class="bi bi-buildings"></i>Empresa
+      </a>
+      <a href="../company/companyInfo.html">
+        <i class="bi bi-buildings"></i>Empresa
+      </a>
+      <a href="#">
+        <i class="bi bi-clock-history"></i> Histórico
+      </a>
+      <a href="#">
+        <i class="bi bi-gear"></i> Configurações
+      </a>
     </nav>
   </aside>
   
@@ -36,9 +52,10 @@
     
     <!-- HEADER -->
     <header class="header">
-      
       <div class="left">
-        <span id="btn-menu"><i class="bi bi-list"></i></span>
+        <span id="btn-menu">
+          <i class="bi bi-list"></i>
+        </span>
         <h3>Sessão</h3>
       </div>
       
@@ -46,40 +63,91 @@
         <input type="search" name="pesquisa" class="input" placeholder="Pesquise a placa">
         <i class="bi bi-moon" id="themeBtn"></i>
       </div>
-      
     </header>
     
     <!-- CONTENT -->
     <main class="main">
+      <section class="cards">
+        
+        <div class="card active">
+          <div class="icon">
+            <i class="bi bi-car-front"></i>
+          </div>
+          
+          <div class="info">
+            <span>Carros ativos</span>
+            <h2 id="active">0</h2>
+          </div>
+        </div>
+        
+        <div class="card entry">
+          <div class="icon">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          
+          <div class="info">
+            <span>Entradas</span>
+            <h2 id="entry">0</h2>
+          </div>
+        </div>
+        
+        <div class="card available">
+          <div class="icon">
+            <i class="bi bi-p-square"></i>
+          </div>
+          
+          <div class="info">
+            <span>Vagas disponíveis</span>
+            <h2 id="available">0</h2>
+          </div>
+        </div>
+      </section>
       
-      <div class="content-wrapper">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span>Veículos Atuais</span>
-        <h3 id="contador">0</h3>
-      </div>
-      <div class="stat-card">
-        <span>Receita Estimada</span>
-        <h3 id="receita-total">0 MT</h3>
-      </div>
-    </div>
-
-    <div class="control-panel">
-      <div class="input-wrapper">
-        <input id="placa" placeholder="Placa do veículo (ex: ABC-1234)" maxlength="8">
-      </div>
-      <button class="btn btn-primary" onclick="entrada()">Adicionar</button>
-    </div>
-
-    <div id="lista" class="grid-veiculos">
-      </div>
-  </div>
-</main>
-
-<button id="saidaBtn" class="btn floating-action" onclick="saida()">
-  Confirmar Saída (Checkout)
-</button>
-
+      <section class="activities">
+        
+        <h2>Movimentações</h2>
+        
+        <!-- 🔥 TABS: Entrada / Saída -->
+        <div class="activity-tabs">
+          <button class="tab active" id="tabEntrada">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Entrada
+          </button>
+          
+          <button class="tab" id="tabSaida">
+            <i class="bi bi-box-arrow-right"></i>
+            Saída
+          </button>
+        </div>
+        
+        <!-- 🔥 FORMULÁRIO -->
+        <div class="activity">
+          
+          <div class="input-group">
+            <i class="bi bi-car-front"></i>
+            
+            <input type="text" id="placa" placeholder="Digite a placa" autocomplete="off" />
+          </div>
+          
+          <!-- BOTÃO DINÂMICO -->
+          <button id="btnAction">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Registrar Entrada
+          </button>
+          
+        </div>
+        
+        <!-- 🔥 LISTA -->
+        <div class="list-cards" id="listSessions">
+          
+          <div class="empty" id="emptyState">
+            <i class="bi bi-inbox"></i>
+            <p>Nenhuma movimentação registrada</p>
+          </div>
+          
+        </div>
+        
+      </section>
     </main>
   </div>
   
