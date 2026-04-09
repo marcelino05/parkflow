@@ -1,7 +1,8 @@
-import User from "../models/User.js";
-import Company from "../models/Company.js";
 import bcrypt from "bcryptjs";
 import planLimits from "../utils/planLimits.js";
+import User from "../models/User.js";
+import Company from "../models/Company.js";
+import Parking from "../models/Parking.js";
 
 export const criarOperador = async (req, res) => {
   try {
@@ -9,9 +10,10 @@ export const criarOperador = async (req, res) => {
       nome,
       telefone,
       email,
-      senha
+      senha,
+      estacionamentoId
     } = req.body;
-
+    
     if (!nome || !telefone || !email || !senha) {
       return res.status(400).json({
         success: false,
@@ -40,19 +42,40 @@ export const criarOperador = async (req, res) => {
 
     const empresa = await Company.findById(usuario.empresaId);
 
-    // 🔥 verificar limite
-    const totalOperadores = await User.countDocuments({
-  empresaId: empresa._id,
-  role: { $in: ["operador"] }
-});
+    if (!empresa) {
+      return res.status(400).json({
+        success: false,
+        message: "Empresa não encontrada."
+      })
+    }
 
-    const limites = planLimits[empresa.plano];
+    // verificar limite
+    const totalOperadores = await User.countDocuments({
+      empresaId: empresa._id,
+      role: {
+        $in: ["operador"]
+      }
+    });
+
+    const limites = planLimits[empresa.plano] || planLimits.default;
 
     if (totalOperadores >= limites.maxOperadores) {
       return res.status(403).json({
         success: false,
         message: "Limite de operadores atingido."
       });
+    }
+
+    const estacionamentoValido = await Parking.findOne({
+      _id: estacionamentoId,
+      empresaId: empresa._id
+    })
+
+    if (!estacionamentoValido) {
+      return res.status(400).json({
+        success: false,
+        message: "Estacionamento inválido."
+      })
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
@@ -63,6 +86,7 @@ export const criarOperador = async (req, res) => {
       email,
       senha: senhaHash,
       empresaId: empresa._id,
+      estacionamentoId,
       role: "operador"
     });
 

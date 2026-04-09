@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import ParkingSession from "../models/ParkingSession.js"
 import Parking from "../models/Parking.js"
 import {
@@ -10,14 +11,33 @@ import {
 export const registrarEntrada = async (req, res) => {
   try {
     const {
-      placa,
-      estacionamentoId
+      placa
     } = req.body;
 
+    let estacionamentoId;
+
+    // operador → automático
+    if (req.usuario.role === "operador") {
+      estacionamentoId = req.usuario.estacionamentoId;
+    }
+    //  admin → escolhe
+    else {
+      estacionamentoId = req.body.estacionamentoId;
+    }
+
+    // validações
     if (!placa?.trim() || !estacionamentoId) {
       return res.status(400).json({
         success: false,
-        message: "Placa e estacionamentoId são obrigatórios"
+        message: "Placa e estacionamento são obrigatórios"
+      });
+    }
+
+    // validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(estacionamentoId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID de estacionamento inválido"
       });
     }
 
@@ -33,7 +53,6 @@ export const registrarEntrada = async (req, res) => {
       });
     }
 
-    // CONTAR CARROS ATIVOS (CORRETO)
     const carrosAtivos = await ParkingSession.countDocuments({
       estacionamentoId,
       empresaId: req.empresaId,
@@ -59,15 +78,14 @@ export const registrarEntrada = async (req, res) => {
         message: "Este carro já está no estacionamento"
       });
     }
-   
+
     const sessao = await ParkingSession.create({
       placa: placa.trim().toUpperCase(),
       estacionamentoId,
       empresaId: req.empresaId,
       operadorId: req.usuarioId,
       horaEntrada: new Date(),
-      status: "ativo",
-
+      status: "ativo"
     });
 
     res.status(201).json({
@@ -80,10 +98,7 @@ export const registrarEntrada = async (req, res) => {
       empresaId: req.empresaId,
       acao: "entrada_carro",
       entidade: "sessao",
-      entidadeId: sessao._id,
-      detalhes: {
-        placa: sessao.placa
-      }
+      entidadeId: sessao._id
     });
 
   } catch (erro) {
@@ -93,6 +108,7 @@ export const registrarEntrada = async (req, res) => {
     });
   }
 };
+
 //*************LinkWa_parkflow*************
 // =>REGISTRAR SAIDA DE CARROS
 //*****************************************
@@ -110,7 +126,18 @@ export const registrarSaida = async (req, res) => {
       });
     }
 
-    const sessao = await ParkingSession.findById(sessaoId);
+    // 🔒 filtro seguro
+    let filtro = {
+      _id: sessaoId,
+      empresaId: req.empresaId
+    };
+
+    // 👷 operador só mexe no seu estacionamento
+    if (req.usuario.role === "operador") {
+      filtro.estacionamentoId = req.usuario.estacionamentoId;
+    }
+
+    const sessao = await ParkingSession.findOne(filtro);
 
     if (!sessao) {
       return res.status(404).json({
@@ -236,9 +263,32 @@ export const contarCarrosAtivos = async (req, res) => {
 //*****************************************
 export const vagasDisponiveis = async (req, res) => {
   try {
-    const {
-      estacionamentoId
-    } = req.params;
+    let estacionamentoId;
+
+    // operador → automático
+    if (req.usuario.role === "operador") {
+      estacionamentoId = req.usuario.estacionamentoId;
+    }
+    // admin → query
+    else {
+      estacionamentoId = req.query.estacionamentoId;
+    }
+
+    // validação básica
+    if (!estacionamentoId) {
+      return res.status(400).json({
+        success: false,
+        message: "Estacionamento não definido"
+      });
+    }
+
+    // validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(estacionamentoId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID inválido"
+      });
+    }
 
     const estacionamento = await Parking.findOne({
       _id: estacionamentoId,
@@ -246,34 +296,48 @@ export const vagasDisponiveis = async (req, res) => {
     });
 
     if (!estacionamento) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Estacionamento não encontrado"
       });
     }
 
-    // 🔥 CONTAGEM REAL (CORRETO)
     const carrosAtivos = await ParkingSession.countDocuments({
       estacionamentoId,
+      empresaId: req.empresaId,
       status: "ativo"
     });
 
-    const vagasDisponiveis = Math.max(
-      0,
-      estacionamento.totalVaga - carrosAtivos
-    );
+    const empresaId = req.empresaId;
+
+    const hojeInicio = new Date();
+    hojeInicio.setHours(0, 0, 0, 0);
+
+    const hojeFim = new Date();
+    hojeFim.setHours(23, 59, 59, 999);
+
+    const entradasHoje = await ParkingSession.countDocuments({
+      empresaId,
+      estacionamentoId,
+      horaEntrada: {
+        $gte: hojeInicio, $lte: hojeFim
+      }
+    });
+
+    const vagas = Math.max(0, estacionamento.totalVaga - carrosAtivos);
 
     res.json({
       success: true,
       totalVagas: estacionamento.totalVaga,
       carrosAtivos,
-      vagasDisponiveis
+      vagasDisponiveis: vagas,
+      entradas: entradasHoje
     });
 
   } catch (erro) {
     res.status(500).json({
       success: false,
-      message: "Erro ao calcular vagas"
+      message: "Erro ao calcular vagas: " + erro.message
     });
   }
 };

@@ -6,6 +6,11 @@
     window.location.href = "../auth/auth.html";
   }
   
+ const user = JSON.parse(localStorage.getItem("user"))
+ if(user.role !== "admin"){
+   window.location.href = "../session/sessao.html"
+ }
+ 
   // ===== LOADING =====
   function mostrarLoading() {
     document.getElementById("receita").innerText = "...";
@@ -117,11 +122,11 @@
   carregarGraficos();
   
   // AUTO REFRESH
-  setInterval(() => {
+  /*setInterval(() => {
     carregarDashboard();
     carregarGraficos();
   }, 10000);
-  
+  */
   const getCompanyName = async () => {
   try {
     const res = await fetch(`${API}/company`, {

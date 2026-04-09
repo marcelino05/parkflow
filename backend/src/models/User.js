@@ -26,7 +26,7 @@ const usuarioSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
-  
+
   role: {
     type: String,
     enum: ["admin", "operador"],
@@ -35,10 +35,17 @@ const usuarioSchema = new mongoose.Schema({
 
     empresaId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Empresa",
+      ref: "Company",
     default: null
     },
 
+    estacionamentoId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Parking",
+      required: function () {
+        return this.role === "operador"
+      }
+    },
     resetPasswordToken: String,
 
     resetPasswordExpire: Date,
@@ -50,4 +57,8 @@ const usuarioSchema = new mongoose.Schema({
 
   });
 
+  usuarioSchema.index({
+    empresaId: 1,
+    role: 1
+  })
   export default mongoose.model("User", usuarioSchema);

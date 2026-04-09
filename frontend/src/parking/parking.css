@@ -1,6 +1,7 @@
 .main{
   background: var(--fundo);
   height: 90vh;
+  font-size: 1rem;
 }
 @media screen and (min-width: 768px) {
   .main{
@@ -62,7 +63,7 @@
 ========================= */
 .parking-card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 15px;
 }
 
@@ -78,7 +79,7 @@
   
   transition: all 0.25s ease;
   border: 1px solid transparent;
-  
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -104,10 +105,13 @@
 }
 
 .parking-status {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: .90em;
+  padding: 4px 14px;
   border-radius: 999px;
   font-weight: 600;
+  position: absolute;
+  right: 30px;
+  transform: translate(-50% 0);
 }
 
 .parking-status.ativo {

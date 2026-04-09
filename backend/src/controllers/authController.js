@@ -11,6 +11,8 @@ const gerarToken = (usuario) => {
       id: usuario._id,
       nome: usuario.nome,
       empresaId: usuario.empresaId || null,
+      role: usuario.role,
+      estacionamentoId: usuario.estacionamentoId || null
     },
     process.env.SECRET_KEY,
     {
@@ -54,7 +56,10 @@ export const registrar = async (req, res, next) => {
     if (nome.length < 2 || nome.length > 50) {
       return erroResposta(res, 400, "Nome deve ter entre 2 e 50 caracteres.");
     }
-
+    
+    if (!/^(?=.*[A-Za-z])(?=.*\d)/.test(senha)) {
+      return erroResposta(res, 400, "A senha deve conter letras e números.");
+    }
     // Validação do telefone
     const telefoneLimpo = telefone.trim();
     if (!/^(82|83|84|85|86|87)[0-9]{7}$/.test(telefoneLimpo)) {
@@ -122,7 +127,9 @@ export const login = async (req, res, next) => {
     if (!email || !senha) {
       return erroResposta(res, 400, "Email e senha são obrigatórios.");
     }
-
+    if (!/^(?=.*[A-Za-z])(?=.*\d)/.test(senha)) {
+      return erroResposta(res, 400, "A senha deve conter letras e números.");
+    }
     email = email.toLowerCase().trim();
     if (!validator.isEmail(email)) {
       return erroResposta(res, 400, "Email ou senha inválidos.");
@@ -149,6 +156,8 @@ export const login = async (req, res, next) => {
         nome: usuario.nome,
         email: usuario.email,
         empresaId: usuario.empresaId,
+        role: usuario.role,
+        estacionamentoId: usuario.estacionamentoId
       },
       token: gerarToken(usuario),
     });

@@ -108,11 +108,6 @@
       return
     }
     
-    const user = {
-      email,
-      senha: password
-    };
-    
     const toast = createToast("A processar...", "info")
     
     try {
@@ -121,31 +116,44 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(user)
+        body: JSON.stringify({email, senha: password})
       })
       
       const data = await res.json()
+      const user = data.usuario
       
+      if(!data.success){
+        updateToast(toast, data.message, "erro")
+      }
+
       if (!res.ok) {
         throw new Error(data.message || "Erro ao fazer login")
       }
       
-      // ✅ SUCESSO
-      updateToast(toast, "Login realizado com sucesso!", "sucesso")
+      //  SUCESSO
       clearfields("form-login")
       
-      //  guardar token
       if (!data.token) return
       
       if (data.token) {
         localStorage.setItem("token", data.token);
-        // opcional: mostrar mensagem de sucesso aqui
+        localStorage.setItem("user", JSON.stringify(user))
+        
+        updateToast(toast, "Login realizado com sucesso!", "sucesso")
+        
         setTimeout(() => {
-          window.location.href = "../dashboard/dashboard.html";
+         if(user.role === "admin"){
+           window.location.href = "../dashboard/dashboard.html";
+           
+         }else{
+           window.location.href = "../session/sessao.html"
+         }
         }, 1500);
+        
       } else {
         console.error("Token não recebido");
       }
+      
     } catch (error) {
       updateToast(toast, error.message, "erro")
       

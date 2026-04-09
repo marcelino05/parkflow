@@ -17,6 +17,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
   
+   const user = JSON.parse(localStorage.getItem("user"))
+ if(user.role !== "admin"){
+   window.location.href = "../session/sessao.html"
+ }
+ 
   // ==============================
   // ELEMENTOS
   // ==============================

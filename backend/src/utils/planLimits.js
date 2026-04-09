@@ -1,11 +1,11 @@
-   export default {
+export default {
   trial: {
     maxEstacionamentos: 1,
     maxVagas: 20,
     maxOperadores: 1
   },
-
   basico: {
+
     maxEstacionamentos: 3,
     maxVagas: 100,
     maxOperadores: 5

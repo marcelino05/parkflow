@@ -1,18 +1,22 @@
 import { createToast, updateToast, removeToast, confirmarToast } from "../utils/toast.js"
 
-/* =========================
-   TOKEN
-========================= */
 const token = localStorage.getItem("token");
+const API = "http://localhost:5000/api/parking";
 
 if (!token) {
   window.location.href = "../auth/auth.html";
 }
 
-/* =========================
-   API
-========================= */
-const API = "http://localhost:5000/api/parking";
+const user = JSON.parse(localStorage.getItem("user"))
+if (user.role === "operador") {
+  document.getElementById("btnNovo").style.display = "none"
+  
+  document.querySelector(".parking-edit-btn").style.display = "none"
+  
+  document.querySelectorAll(".only-admin").forEach(a => {
+    a.remove()
+  })
+}
 
 /* =========================
    ELEMENTOS
@@ -35,7 +39,6 @@ const modalTitle = document.getElementById("modalTitle");
    ESTADO
 ========================= */
 let editId = null;
-
 /* =========================
    MODAL
 ========================= */
@@ -94,8 +97,7 @@ async function listar() {
         "—";
       
       card.querySelector(".parking-status").textContent =
-        item.ativo || "ativo";
-      
+        item.ativo || "ativo"
       card.querySelector(".parking-vagas").textContent = item.totalVaga || 0;
       card.querySelector(".parking-disponivel").textContent = item.vagasDisponiveis || 0;
       card.querySelector(".parking-preco").textContent = item.precoPorHora || 0;

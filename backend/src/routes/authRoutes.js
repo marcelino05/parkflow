@@ -19,6 +19,6 @@ const router = express.Router()
 
 //ROTAS do autenticação
 router.post("/registrar", registrar)
-router.post("/login", loginLimiter,login)
+router.post("/login", loginLimiter, login)
 
 export default router;

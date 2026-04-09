@@ -1,103 +1,208 @@
 /* =========================
-   HEADER (NÃO ALTERAR)
+   BASE GERAL
 ========================= */
-.header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  height: auto;
-  padding: 15px;
-  box-sizing: var(--sombra);
-}
 
-.left {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 1.3em;
-}
-
-.right {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  gap: 10px;
-  margin-left: auto;
-}
-
-.right .input{
-  padding: 10px;
-}
-
-.input,
-input i {
-  padding: 8px;
-  background: var(--borda);
-  border-radius: 10px;
+body {
+  background: var(--fundo);
   color: var(--texto);
-}
-
-@media (max-width: 600px) {
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
-    width: 100%;
-  }
-
-  .input {
-    width: 100%;
-    order: 1;
-    margin-top: 5px;
-    font-size: .90rem;
-    font-weight: 500;
-    padding: 0;
-  }
-
-  #themeBtn {
-    order: 2;
-  }
+  font-size: 1em;
 }
 
 /* =========================
-   CARDS (NÃO ALTERAR)
+   LAYOUT
 ========================= */
-.main section.cards {
+
+.layout {
+  margin-left: 250px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   SIDEBAR (MENU)
+========================= */
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
   margin-bottom: 20px;
 }
 
-.cards .active {
-  background: linear-gradient(135deg, #16A34A, #15803d);
+.logo {
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
-.cards .entry {
-  background: linear-gradient(135deg, #2563EB, #1d4ed8);
+.close-icon {
+  font-size: 16px; /* SX16 como você disse */
+  cursor: pointer;
+  
+  padding: 6px;
+  border-radius: var(--radius);
+  
+  transition: 0.3s;
 }
 
-.cards .available {
-  background: linear-gradient(135deg, #F59E0B, #d97706);
+
+
+.sidebar {
+  position: fixed;
+  width: 250px;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  background: var(--card);
+  border-right: 1px solid var(--borda);
+  
+  padding: 15px;
+  transition: 0.3s;
+
+  /* CORREÇÃO: abaixo do header */
+  z-index: 100;
 }
 
-.activities {
-  width: 100%;
-  border: 1px solid var(--borda);
-  border-radius: 14px;
-  padding: 18px;
-  background: var(--bg);
+/* links do menu */
+.sidebar nav a {
+  display: block;
+  padding: 8px;
+  margin-bottom: 5px;
+  font-weight: bolder;
+  font-size: 1em;
+  color: var(--texto);
+  border-radius: var(--radius);
+  transition: 0.3s;
 }
 
-/* TÍTULO */
-.activities h2 {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  font-weight: 600;
+b{
+  color: var(--cor-sucesso);
+}
+
+.sidebar nav a:hover {
+  background: var(--cor-primaria);
+  color: #fff;
 }
 
 /* =========================
-   TABS (Entrada / Saída)
+   HEADER (TOPBAR)
 ========================= */
-.activity-tabs {
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: var(--card);
+  padding: 10px;
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+
+  /* CORREÇÃO: acima da sidebar */
+  z-index: 1000;
+}
+
+.header .left,
+.header .right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header .right .input{
+  width: 100%;
+  margin-left: 15px;
+}
+
+/* =========================
+   INPUT
+========================= */
+
+.input {
+  padding: 8px 10px;
+  
+  border: 1px solid var(--borda);
+  border-radius: var(--radius);
+  
+  background: var(--card);
+  color: var(--texto);
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  
+  background: var(--card);
+  padding: 15px;
+  
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card .icon {
+  font-size: 1.3em;
+  padding: 8px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.card.active .icon {
+  background: var(--cor-sucesso);
+}
+
+.card.entry .icon {
+  background: var(--cor-alerta);
+}
+
+/* textos */
+.card span {
+  color: var(--sub);
+  font-size: 12px;
+}
+
+.card h2 {
+  font-size: 18px;
+}
+
+/* =========================
+   SEÇÃO PRINCIPAL
+========================= */
+
+.pf-activities {
+  background: var(--card);
+  padding: 20px;
+  
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+}
+
+.pf-activities h2{
+  margin-bottom: 20px;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.pf-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
@@ -105,231 +210,137 @@ input i {
 
 .tab {
   flex: 1;
+  
   padding: 10px;
-  border-radius: 10px;
-  border: 1px solid var(--borda);
-  background: transparent;
-  color: var(--texto);
-  font-weight: 500;
+  border-radius: var(--radius);
+  
+  background: var(--fundo);
+  color: #fff;
+  
   cursor: pointer;
-  transition: 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.tab:hover {
-  background: var(--borda);
 }
 
 .tab.active {
   background: var(--cor-primaria);
   color: #fff;
-  border-color: var(--cor-primaria);
+}
+
+#tabSaida{
+  background: var(--cor-erro);
 }
 
 /* =========================
-   INPUT + BOTÃO
+   FORMULÁRIO
 ========================= */
-.activity {
+
+.pf-form {
   display: flex;
   gap: 10px;
-  align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-/* INPUT MODERNO */
-.input-group {
+.pf-input-group {
+  position: relative;
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--card);
-  border: 1px solid var(--borda);
-  padding: 10px 12px;
-  border-radius: 12px;
-  transition: 0.2s;
 }
 
-.input-group:focus-within {
-  border-color: var(--cor-primaria);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+.pf-input-group i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  color: var(--sub);
 }
 
-.input-group i {
-  color: var(--texto);
-  opacity: 0.6;
-}
-
-.input-group input {
+.pf-input-group input,
+.pf-input-group select {
   width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
+  
+  padding: 10px 10px 10px 35px;
+  
+  border: 1px solid var(--borda);
+  border-radius: var(--radius);
+  
+  background: var(--card);
   color: var(--texto);
-  font-size: 0.95rem;
 }
 
-/* BOTÃO */
-#btnAction {
-  padding: 11px 16px;
-  border-radius: 12px;
-  border: none;
+/* =========================
+   BOTÃO
+========================= */
+
+.pf-button {
+  padding: 10px 15px;
+  
+  border-radius: var(--radius);
   background: var(--cor-primaria);
   color: #fff;
-  font-weight: 600;
+  
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: 0.2s;
-  white-space: nowrap;
 }
 
-#btnAction:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-#btnAction:active {
-  transform: scale(0.98);
+.pf-button:hover {
+  background: var(--cor-primaria-hover);
 }
 
 /* =========================
-   EMPTY STATE
+   LISTA
 ========================= */
-.empty {
-  text-align: center;
-  padding: 30px 10px;
-  color: var(--texto);
-  opacity: 0.6;
-}
 
-.empty i {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: 8px;
-}
-
-/* =========================
-   LISTA DE SESSÕES
-========================= */
-.list-cards {
+.pf-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* CARD */
-.session-card {
-  background: var(--card);
-  border: 1px solid var(--borda);
-  padding: 12px;
-  border-radius: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: 0.2s;
-}
-
-.session-card:hover {
-  transform: translateY(-2px);
-}
-
-/* INFO */
-.session-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.session-info strong {
-  font-size: 0.95rem;
-}
-
-.session-info span {
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
-
-/* BADGE */
-.badge {
-  display: inline-block;
-  margin-top: 4px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  background: var(--cor-sucesso);
-  color: #fff;
-  width: fit-content;
-}
-
-/* BOTÃO SAÍDA */
-.session-actions button {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: var(--cor-erro);
-  color: #fff;
-  font-size: 0.8rem;
+.empty {
+  text-align: center;
+  padding: 20px;
+  
+  color: var(--sub);
 }
 
 /* =========================
-   MOBILE
+   OVERLAY (DESATIVADO)
 ========================= */
-@media (max-width: 600px) {
+
+.overlay {
+  display: none;
+}
+
+/* =========================
+   RESPONSIVO (MOBILE)
+========================= */
+
+@media (max-width: 768px) {
   
-  .activities {
-    padding: 12px;
+  .layout {
+    margin-left: 0;
+    padding: 10px;
   }
   
-  /* TABS mais compactas */
-  .activity-tabs {
+  .cards {
     flex-direction: row;
-  }
-  
-  .tab {
-    font-size: 0.85rem;
-    padding: 8px;
-  }
-  
-  /* 🔥 INPUT MAIS FINO E MODERNO */
-  .activity {
-    flex-direction: column;
     gap: 8px;
   }
   
-  .input-group {
-    padding: 8px 10px;
-    border-radius: 10px;
+  .card {
+    padding: 8px;
+    font-size: 11px;
   }
   
-  .input-group input {
-    font-size: 0.85rem;
+  .pf-form {
+    flex-direction: column;
   }
   
-  .input-group i {
-    font-size: 0.9rem;
-}
-  
-  /* BOTÃO mais elegante */
-  #btnAction {
-    width: 100%;
-    padding: 10px;
-    font-size: 0.9rem;
-    justify-content: center;
+  /* sidebar escondida */
+  .sidebar {
+    transform: translateX(-100%);
   }
-  
-  /* CARD mais leve */
-  .session-card {
-    padding: 10px;
-    font-size: 0.85rem;
-  }
-  
-  .session-actions button {
-    padding: 5px 8px;
-    font-size: 0.75rem;
+
+  .sidebar.active {
+    transform: translateX(0);
   }
 }
+

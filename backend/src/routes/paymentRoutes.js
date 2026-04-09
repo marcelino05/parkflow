@@ -19,7 +19,7 @@ const router = express.Router();
 
 
 // cliente envia (admin)
-router.post("/pedido", verificarToken, verificarEmpresa, permitir("admin"), criarPedidoPagamento);
+router.post("/pedido", verificarToken,  permitir("admin"), criarPedidoPagamento);
 
 // só admin pode confirmar
 router.post("/confirmar", verificarToken, permitir("admin"), confirmarPagamento);

@@ -5,16 +5,18 @@ export const verificarToken = async(req, res, next)=> {
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
-      success: false,message: "Token não fornecido ou inválido."
+      success: false, message: "Token não fornecido ou inválido."
     });
   }
   const token = authHeader.split(" ")[1]
 
   try {
     const decodificado = jwt.verify(token, process.env.SECRET_KEY)
-    req.usuarioId = decodificado.id
-
-    next()
+    req.usuarioId = decodificado.id;
+    req.empresaId = decodificado.empresaId;
+    req.usuario = decodificado;
+    
+    next();
 
   }catch(erro) {
     res.status(500).json({

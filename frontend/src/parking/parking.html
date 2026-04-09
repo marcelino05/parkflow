@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ParkFlow - Estacionamento</title>
-
+  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
+  
   <!-- CSS -->
   <link rel="stylesheet" href="../utils/global.css">
   <link rel="stylesheet" href="../dashboard/dashboard.css">
@@ -16,25 +16,39 @@
 </head>
 
 <body>
-
+  
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <h2 class="logo">Park<b>Flow</b></h2>
-
+    
     <nav>
-      <a href="../dashboard/dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
-      <a href="../session/sessao.html"><i class="bi bi-car-front"></i> Sessões</a>
-      <a href="./parking.html"><i class="bi bi-p-square"></i> Estacionamento</a>
-      <a href="#"><i class="bi bi-person"></i> Operadores</a>
-      <a href="../company/companyInfo.html"><i class="bi bi-buildings"></i>Empresa</a>
-      <a href="#"><i class="bi bi-clock-history"></i> Histórico</a>
-      <a href="#"><i class="bi bi-gear"></i> Configurações</a>
+      <a href="../dashboard/dashboard.html" class="only-admin">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="../session/sessao.html">
+        <i class="bi bi-car-front"></i> Sessões
+      </a>
+      <a href="./parking.html" id="menuParking">
+        <i class="bi bi-p-square"></i> Estacionamento
+      </a>
+      <a href="../operators/operator.html" class="only-admin">
+        <i class="bi bi-person"></i> Operadores
+      </a>
+      <a href="../companyInfo/companyInfo.html" class="only-admin">
+        <i class="bi bi-buildings"></i>Empresa
+      </a>
+      <a href="../histories/history.html">
+        <i class="bi bi-clock-history"></i> Histórico
+      </a>
+      <a href="../settings/setting.html" class="only-admin">
+        <i class="bi bi-gear"></i> Configurações
+      </a>
     </nav>
   </aside>
-
+  
   <!-- LAYOUT -->
   <div class="layout">
-
+    
     <!-- HEADER -->
     <header class="header">
       <div class="left">
@@ -42,30 +56,30 @@
         <h3>Estacionamento</h3>
         <h4 id="companyName"></h4>
       </div>
-
+      
       <div class="right">
         <i class="bi bi-bell"></i>
         <i class="bi bi-moon" id="themeBtn"></i>
         <a href="#" class="btn-primary">Plano</a>
       </div>
     </header>
-
+    
     <!-- MAIN -->
     <main class="main">
-
+      
       <div class="parking-container">
-
+        
         <!-- TOPO -->
         <div class="parking-topbar">
           <h1>Parques de Estacionamento</h1>
           <button id="btnNovo" class="parking-btn">+ Novo Parque</button>
         </div>
-
+        
         <!-- LISTA -->
         <div id="card-list" class="parking-card-list"></div>
-
+        
       </div>
-
+      
       <!-- CARD TEMPLATE (ESCONDIDO) -->
       <div id="template-card" class="parking-card-item" style="display:none;">
         
@@ -74,89 +88,90 @@
             <h3 class="parking-name"></h3>
             <span class="parking-status"></span>
           </div>
-
-          <div class="parking-edit-btn">
+          
+          <div class="parking-edit-btn" >
             <i class="bi bi-pencil-square"></i>
           </div>
         </div>
-
+        
         <p class="parking-location">
           <i class="bi bi-geo-alt"></i>
           <span></span>
         </p>
-
+        
         <p class="parking-created">
           <i class="bi bi-calendar"></i>
           <span></span>
         </p>
-
+        
         <div class="parking-stats">
-
+          
           <div class="parking-box">
             <span>Vagas</span>
             <strong class="parking-vagas"></strong>
           </div>
-
+          
           <div class="parking-box">
             <span>Disponível</span>
             <strong class="parking-disponivel"></strong>
           </div>
-
+          
           <div class="parking-box">
             <span>Preço</span>
             <strong class="parking-preco"></strong>
           </div>
-
+          
           <div class="parking-box">
             <span>Receita</span>
             <strong class="parking-receita"></strong>
           </div>
-
+          
         </div>
-
+        
       </div>
-
+      
       <!-- MODAL -->
       <section id="modal" class="parking-modal">
         <div class="parking-modal-content">
-
+          
           <h2 id="modalTitle">Novo Parque</h2>
-
+          
           <div class="input-group">
             <input type="text" id="nome" placeholder="Nome">
             <i class="bi bi-building"></i>
           </div>
-
+          
           <div class="input-group">
             <input type="text" id="endereco" placeholder="Endereço">
             <i class="bi bi-geo-alt"></i>
           </div>
-
+          
           <div class="input-group">
             <input type="number" id="vagas" placeholder="Total de vagas">
             <i class="bi bi-grid"></i>
           </div>
-
+          
           <div class="input-group">
             <input type="number" id="preco" placeholder="Preço por hora">
             <i class="bi bi-currency-dollar"></i>
           </div>
-
+          
           <div class="parking-btns">
             <button id="salvar" class="parking-btn">Salvar</button>
             <button id="cancelar" class="parking-btn cancel">Cancelar</button>
           </div>
-
+          
         </div>
       </section>
-
+      
     </main>
-
+    
   </div>
-
+  
   <!-- JS -->
   <script type="module" src="./parking.js" defer></script>
   <script src="../utils/global.js" defer></script>
-
+  
 </body>
+
 </html>

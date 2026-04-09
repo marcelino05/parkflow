@@ -6,6 +6,7 @@ export const listarLogs = async (req, res) => {
     const logs = await Log.find({
       empresaId: req.empresaId
     })
+    .populate("usuarioId", "nome") // 👈 AQUI
     .sort({ criadoEm: -1 })
     .limit(50);
 
