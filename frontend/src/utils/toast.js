@@ -1,5 +1,12 @@
-// TOAST 
+// =========================
+// TOAST ÚNICO (GLOBAL)
+// =========================
+let toastInstance = null;
+let removeTimeout = null;
 
+// =========================
+// CONTAINER
+// =========================
 let toastContainer = null;
 
 const getContainer = () => {
@@ -11,62 +18,90 @@ const getContainer = () => {
   return toastContainer;
 };
 
-// CRIAR TOAST
-export const createToast = (msg, tipo = "info") => {
+// =========================
+// CRIAR TOAST (SÓ 1)
+// =========================
+export const createToast = (msg = "", tipo = "info") => {
   const container = getContainer();
   
-  // cria sempre novo toast (evita bugs de duplicação)
+  // se já existe, só atualiza
+  if (toastInstance) {
+    updateToast(toastInstance, msg, tipo);
+    return toastInstance;
+  }
+  
   const div = document.createElement("div");
   div.className = "toast " + tipo;
   div.textContent = msg;
   
   container.appendChild(div);
   
-  // remove automático (exceto confirmação que controla isso)
-  removeToast(div);
+  toastInstance = div;
   
   return div;
 };
 
-// ATUALIZAR TOAST 
-export const updateToast = (toast, msg, tipo = "info") => {
-  if (!toast) return;
+// =========================
+// ATUALIZAR TOAST (COM AUTO CLOSE)
+// =========================
+export const updateToast = (toast, msg, tipo = "info", tempo = 2500) => {
+  const target = toast || toastInstance;
   
-  toast.textContent = msg;
-  toast.className = "toast " + tipo;
-};
-
-// REMOVER TOAST
-export const removeToast = (toast, tempo = 5000) => {
-  if (!toast) return;
+  if (!target) return;
   
-  setTimeout(() => {
-    toast.classList.add("saindo");
+  // limpa timer anterior (evita bug de múltiplos closes)
+  if (removeTimeout) {
+    clearTimeout(removeTimeout);
+  }
+  
+  target.textContent = msg;
+  target.className = "toast " + tipo;
+  
+  // se tempo for 0, não remove
+  if (tempo === 0) return;
+  
+  removeTimeout = setTimeout(() => {
+    if (!toastInstance) return;
+    
+    toastInstance.classList.add("saindo");
     
     setTimeout(() => {
-      toast.remove();
+      toastInstance.remove();
+      toastInstance = null;
     }, 300);
   }, tempo);
 };
 
-const removerAgora = (toast) => {
-  if (!toast) return;
-  
-  toast.classList.add("saindo");
+// =========================
+// REMOVER MANUAL (SE PRECISAR)
+// =========================
+export const removeToast = (tempo = 2000) => {
+  if (!toastInstance) return;
   
   setTimeout(() => {
-    toast.remove();
-  }, 300);
+    toastInstance.classList.add("saindo");
+    
+    setTimeout(() => {
+      toastInstance.remove();
+      toastInstance = null;
+    }, 300);
+  }, tempo);
 };
 
+// =========================
+// RESET TOTAL (OPCIONAL)
+// =========================
+export const clearToast = () => {
+  if (removeTimeout) clearTimeout(removeTimeout);
+  
+  if (toastInstance) {
+    toastInstance.remove();
+    toastInstance = null;
+  }
+};
 export function confirmarToast(mensagem) {
   return new Promise((resolve) => {
     const toast = createToast(mensagem, "info");
-    
-    if (!toast) {
-      resolve(false);
-      return;
-    }
     
     const container = document.createElement("div");
     container.classList.add("toast-actions");
@@ -84,15 +119,22 @@ export function confirmarToast(mensagem) {
     
     toast.appendChild(container);
     
-    // CONFIRMAR → some imediatamente
+    // NÃO auto-remove aqui, controle manual
+    updateToast(toast, mensagem, "info", 0);
+    
     btnConfirmar.onclick = () => {
-      removerAgora(toast);
+      updateToast(toast, "Confirmado", "sucesso");
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
       resolve(true);
     };
     
-    // CANCELAR → some imediatamente
     btnCancelar.onclick = () => {
-      removerAgora(toast);
+      updateToast(toast, "Cancelado", "erro");
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
       resolve(false);
     };
   });

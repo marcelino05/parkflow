@@ -171,14 +171,12 @@ export const login = async (req, res, next) => {
 //=========LINKWA PARKFLOW =============
 //RECUPERAÇÃO DE SENHA
 //=======================================
-
 export const esqueciSenha = async (req, res, next) => {
   try {
     const {
       email
     } = req.body;
 
-    // 1. Validação básica
     if (!email || typeof email !== "string") {
       return erroResposta(res, 400, "Email é obrigatório.");
     }
@@ -189,12 +187,11 @@ export const esqueciSenha = async (req, res, next) => {
       return erroResposta(res, 400, "Email inválido.");
     }
 
-    // 2. Buscar usuário
     const usuario = await User.findOne({
       email: emailLimpo
     });
 
-    // segurança: não revelar se existe ou não (produção SaaS)
+    // segurança SaaS (não revelar existência)
     if (!usuario) {
       return res.status(200).json({
         success: true,
@@ -202,54 +199,65 @@ export const esqueciSenha = async (req, res, next) => {
       });
     }
 
-    // 3. Gerar token
-    const redefinirToken = crypto.randomBytes(32).toString("hex");
+    // gerar token seguro
+    const resetToken = crypto.randomBytes(32).toString("hex");
 
-    const redefinirTokenHash = crypto
+    const resetTokenHash = crypto
     .createHash("sha256")
-    .update(redefinirToken)
+    .update(resetToken)
     .digest("hex");
 
-    // 4. Guardar no banco
-    usuario.resetPasswordToken = redefinirTokenHash;
+    usuario.resetPasswordToken = resetTokenHash;
     usuario.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 min
 
     await usuario.save();
 
-    // 5. Link de reset
-    const link = `http://localhost:5000/reset-password.html?token=${redefinirToken}`;
+    const link = `http://localhost:5000/resetar-senha.html?token=${resetToken}`;
 
-    // 6. ENVIAR EMAIL (AQUI É ONDE USA O MAILER)
     await enviarEmail(
       usuario.email,
       "Recuperação de senha - ParkFlow",
       `
-      <div style="font-family:Arial;background:#0f172a;padding:40px;">
+      <div style="font-family:Arial,sans-serif;background:#0f172a;padding:40px;">
       <div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:12px;color:#fff;">
 
-      <h2 style="color:#22d3ee;">ParkFlow</h2>
+      <!-- LOGO -->
+      <h2 style="color:#2563eb;margin-bottom:20px;">
+      Park<span style="color:#15803d;">Flow</span>
+      </h2>
 
-      <h3>Recuperação de senha</h3>
+      <h3 style="margin-bottom:10px;">Recuperação de senha</h3>
 
       <p>Olá <b>${usuario.nome}</b>,</p>
 
-      <p>Recebemos uma solicitação para redefinir sua senha.</p>
+      <p>Recebemos um pedido para redefinir sua senha.</p>
 
-      <p>Clique no botão abaixo para continuar:</p>
+      <p style="margin:20px 0;">
+      Clique no botão abaixo para continuar:
+      </p>
 
+      <!-- BOTÃO -->
       <a href="${link}"
-      style="display:inline-block;padding:12px 20px;background:#22d3ee;color:#000;text-decoration:none;border-radius:8px;font-weight:bold;">
+      style="
+      display:inline-block;
+      padding:12px 22px;
+      background:#2563eb;
+      color:#fff;
+      text-decoration:none;
+      border-radius:8px;
+      font-weight:bold;
+      ">
       Redefinir senha
       </a>
 
-      <p style="margin-top:20px;color:#94a3b8;font-size:12px;">
-      Este link expira em 10 minutos.
+      <p style="margin-top:25px;color:#94a3b8;font-size:12px;">
+      Este link expira em <b>10 minutos</b>.
       </p>
 
       <hr style="border:1px solid #1f2937;margin:20px 0;" />
 
       <p style="font-size:11px;color:#64748b;">
-      Se você não solicitou isso, ignore este email.
+      Se você não solicitou isso, pode ignorar este email com segurança.
       </p>
 
       </div>
@@ -257,7 +265,6 @@ export const esqueciSenha = async (req, res, next) => {
       `
     );
 
-    // 7. Resposta final
     return res.status(200).json({
       success: true,
       message: "Se o email existir, enviaremos um link de recuperação."
@@ -267,7 +274,6 @@ export const esqueciSenha = async (req, res, next) => {
     next(error);
   }
 };
-
 
 //REDEFINIR SENHA
 export const redefinirSenha = async (req, res, next) => {
@@ -281,6 +287,10 @@ export const redefinirSenha = async (req, res, next) => {
 
     if (!senha) {
       return erroResposta(res, 400, "Nova senha é obrigatória.");
+    }
+
+    if (senha.length < 6) {
+      return erroResposta(res, 400, "Senha muito curta.");
     }
 
     const tokenHash = crypto
@@ -299,10 +309,6 @@ export const redefinirSenha = async (req, res, next) => {
       return erroResposta(res, 400, "Token inválido ou expirado.");
     }
 
-    if (senha.length < 6) {
-      return erroResposta(res, 400, "Senha muito curta.");
-    }
-
     const senhaHash = await bcrypt.hash(senha, 10);
 
     usuario.senha = senhaHash;
@@ -319,4 +325,5 @@ export const redefinirSenha = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+
 };

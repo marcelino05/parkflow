@@ -58,7 +58,7 @@ const register = async () => {
       setSession(res.token, { role: "admin" });
       
       setTimeout(() => {
-        window.location.href = "../empresa/empresa.html";
+        window.location.href = "../company/company.html";
       }, 1500);
     }
     
@@ -93,7 +93,6 @@ const login = async () => {
     }
     
     const user = res.usuario;
-    
     // 🔥 salvar sessão
     setSession(res.token, user);
     

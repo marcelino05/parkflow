@@ -39,13 +39,11 @@ const usuarioSchema = new mongoose.Schema({
     default: null
     },
 
-    estacionamentoId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Parking",
-      required: function () {
-        return this.role === "operador"
-      }
-    },
+  estacionamentoId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Parking",
+  default: null
+},
     resetPasswordToken: String,
 
     resetPasswordExpire: Date,

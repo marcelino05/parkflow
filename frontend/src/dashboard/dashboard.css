@@ -108,7 +108,7 @@
     border-radius: 18px;
     color: #fff;
     overflow: hidden;
-    min-height: 135px;
+    min-height: 100px;
     transition: 0.3s;
   }
   
@@ -150,8 +150,8 @@
   
   /* ÍCONE BONITO */
   .icon {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
@@ -169,7 +169,7 @@
   }
   
   .info h2 {
-    font-size: 1.8em;
+    font-size: 1.5em;
     margin-top: 5px;
   }
   
