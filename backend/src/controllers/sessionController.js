@@ -236,27 +236,29 @@ export const listarHistorico = async(req, res)=> {
 //*************LinkWa_parkflow*************
 // =>CONTAR CARROS ATIVOS
 //*****************************************
-export const contarCarrosAtivos = async (req, res) => {
+export const listarCarrosAtivos = async (req, res) => {
   try {
-    const total = await ParkingSession.countDocuments({
+    const ativos = await ParkingSession.find({
       empresaId: req.empresaId,
       status: "ativo"
+    })
+    .populate("estacionamentoId", "nome endereco") // opcional otimizar
+    .sort({
+      criadoEm: -1
     });
 
-    res.json({
+    return res.json({
       success: true,
-      status: "ativo",
-      total
+      data: ativos
     });
 
   } catch (erro) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Falha ao contar carros"
+      message: "Erro ao listar ativos"
     });
   }
 };
-
 
 //*************LinkWa_parkflow*************
 // =>VAGAS DISPONÍVEIS

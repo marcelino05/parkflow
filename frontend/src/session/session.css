@@ -1,5 +1,5 @@
 /* =========================
-   BASE GERAL
+   BASE
 ========================= */
 
 body {
@@ -9,7 +9,7 @@ body {
 }
 
 /* =========================
-   LAYOUT
+   LAYOUT (EVITA ESTICAR DEMAIS)
 ========================= */
 
 .layout {
@@ -17,35 +17,14 @@ body {
   padding: 20px;
   position: relative;
   z-index: 1;
+
+  max-width: 1400px;
+  margin-right: auto;
 }
 
 /* =========================
-   SIDEBAR (MENU)
+   SIDEBAR
 ========================= */
-.sidebar-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  
-  margin-bottom: 20px;
-}
-
-.logo {
-  font-size: 1.5em;
-  font-weight: bold;
-}
-
-.close-icon {
-  font-size: 16px; /* SX16 como você disse */
-  cursor: pointer;
-  
-  padding: 6px;
-  border-radius: var(--radius);
-  
-  transition: 0.3s;
-}
-
-
 
 .sidebar {
   position: fixed;
@@ -55,28 +34,45 @@ body {
   top: 0;
   background: var(--card);
   border-right: 1px solid var(--borda);
-  
   padding: 15px;
   transition: 0.3s;
-
-  /* CORREÇÃO: abaixo do header */
   z-index: 100;
 }
 
-/* links do menu */
-.sidebar nav a {
-  display: block;
-  padding: 8px;
-  margin-bottom: 5px;
-  font-weight: bolder;
-  font-size: 1em;
-  color: var(--texto);
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.logo {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+b {
+  color: var(--cor-sucesso);
+}
+
+.close-icon {
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
   border-radius: var(--radius);
   transition: 0.3s;
 }
 
-b{
-  color: var(--cor-sucesso);
+/* LINKS */
+.sidebar nav a {
+  display: block;
+  padding: 12px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 1em;
+  color: var(--texto);
+  border-radius: var(--radius);
+  transition: 0.3s;
 }
 
 .sidebar nav a:hover {
@@ -84,26 +80,40 @@ b{
   color: #fff;
 }
 
+/* DESKTOP MELHOR LEITURA */
+@media (min-width: 1200px) {
+  .sidebar nav a {
+    font-size: 1.2em;
+    padding: 10px;
+  }
+
+  .logo {
+    font-size: 2em;
+  }
+}
+
 /* =========================
-   HEADER (TOPBAR)
+   HEADER (NUNCA QUEBRA)
 ========================= */
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+
   width: 100%;
   background: var(--card);
   padding: 10px;
   border-radius: var(--radius);
   box-shadow: var(--sombra);
-  
-  margin-bottom: 10px;
+
   position: sticky;
   top: 0;
-
-  /* CORREÇÃO: acima da sidebar */
   z-index: 1000;
+
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .header .left,
@@ -111,46 +121,52 @@ b{
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
-.header .right .input{
+.header .right .input {
   width: 100%;
-  margin-left: 15px;
+  margin-left: 10px;
+}
+
+#themeBtn {
+  flex-shrink: 0;
 }
 
 /* =========================
-   INPUT
+   INPUT BASE
 ========================= */
 
-.input {
+.input , input{
   padding: 8px 10px;
-  
   border: 1px solid var(--borda);
   border-radius: var(--radius);
-  
   background: var(--card);
   color: var(--texto);
+  font-weight: 500;
 }
 
 /* =========================
-   CARDS
+   CARDS (BASE)
 ========================= */
 
 .cards {
   display: flex;
-  gap: 15px;
+  gap: 8px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .card {
   flex: 1;
-  
+  min-width: 150px;
+  min-height: 100px;
+
   background: var(--card);
-  padding: 15px;
-  
+  padding: 12px;
   border-radius: var(--radius);
   box-shadow: var(--sombra);
-  
+
   display: flex;
   align-items: center;
   gap: 10px;
@@ -158,7 +174,7 @@ b{
 
 .card .icon {
   font-size: 1.3em;
-  padding: 8px;
+  padding: 10px;
   border-radius: 50%;
   background: var(--cor-primaria);
   color: #fff;
@@ -172,76 +188,58 @@ b{
   background: var(--cor-alerta);
 }
 
-/* textos */
-.card span {
-  color: var(--sub);
-  font-size: 12px;
-}
+/* DESKTOP GRANDE */
+@media (min-width: 1200px) {
+  .card {
+    min-width: 280px;
+    min-height: 140px;
+    padding: 20px;
+  }
 
-.card h2 {
-  font-size: 18px;
+  .card h2 {
+    font-size: 28px;
+  }
+
+  .card span {
+    font-size: 14px;
+  }
+
+  .card .icon {
+    font-size: 1.8em;
+    padding: 14px;
+  }
 }
 
 /* =========================
-   SEÇÃO PRINCIPAL
+   SESSÕES
 ========================= */
 
 .pf-activities {
   background: var(--card);
   padding: 20px;
-  
   border-radius: var(--radius);
   box-shadow: var(--sombra);
 }
 
-.pf-activities h2{
+.pf-activities h2 {
   margin-bottom: 20px;
 }
 
 /* =========================
-   TABS
-========================= */
-
-.pf-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.tab {
-  flex: 1;
-  
-  padding: 10px;
-  border-radius: var(--radius);
-  
-  background: var(--fundo);
-  color: #fff;
-  
-  cursor: pointer;
-}
-
-.tab.active {
-  background: var(--cor-primaria);
-  color: #fff;
-}
-
-#tabSaida{
-  background: var(--cor-erro);
-}
-
-/* =========================
-   FORMULÁRIO
+   FORM (INPUT + BOTÃO)
 ========================= */
 
 .pf-form {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .pf-input-group {
+  flex: 2;
+  min-width: 180px;
   position: relative;
-  flex: 1;
 }
 
 .pf-input-group i {
@@ -249,35 +247,37 @@ b{
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  
   color: var(--sub);
 }
 
 .pf-input-group input,
 .pf-input-group select {
   width: 100%;
-  
-  padding: 10px 10px 10px 35px;
-  
+  padding: 10px 35px 10px 35px;
   border: 1px solid var(--borda);
   border-radius: var(--radius);
-  
   background: var(--card);
   color: var(--texto);
 }
 
-/* =========================
-   BOTÃO
-========================= */
-
+/* BOTÃO COM PRESENÇA REAL */
 .pf-button {
+  flex: 1;
+  min-width: 130px;
+
   padding: 10px 15px;
-  
   border-radius: var(--radius);
   background: var(--cor-primaria);
   color: #fff;
-  
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .pf-button:hover {
@@ -292,49 +292,88 @@ b{
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 30px;
 }
 
 .empty {
   text-align: center;
   padding: 20px;
-  
   color: var(--sub);
 }
 
 /* =========================
-   OVERLAY (DESATIVADO)
+   ONLY ADMIN
 ========================= */
 
-.overlay {
-  display: none;
+.only-admin {
+  display: block;
 }
 
 /* =========================
-   RESPONSIVO (MOBILE)
+   MOBILE (3 CARDS NA MESMA LINHA + HEADER FIX)
 ========================= */
 
 @media (max-width: 768px) {
-  
+
   .layout {
     margin-left: 0;
     padding: 10px;
   }
-  
+
+  /* 3 CARDS NA MESMA LINHA */
   .cards {
-    flex-direction: row;
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-top: 15px;
   }
-  
+
   .card {
-    padding: 8px;
-    font-size: 11px;
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+    min-height: 85px;
+    box-shadow: var(--sombra);
   }
-  
+
+  .card h2 {
+    font-size: 1.2em;
+  }
+
+  .card span {
+    font-size: .70em;
+    color: var(--sub);
+  }
+
+  .card .icon {
+    font-size: 1.1em;
+    padding: 6px;
+  }
+
+  /* HEADER NÃO QUEBRA */
+  .header {
+    flex-wrap: nowrap;
+  }
+
+  .header .right .input {
+    min-width: 50px;
+  }
+
+  /* FORM RESPONSIVO */
   .pf-form {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
-  
-  /* sidebar escondida */
+
+  .pf-input-group {
+    flex: 1 1 70%;
+    min-width: unset;
+  }
+
+  .pf-button {
+    flex: 1 1 25%;
+    min-width: unset;
+  }
+
+  /* SIDEBAR MOBILE */
   .sidebar {
     transform: translateX(-100%);
   }
@@ -344,3 +383,117 @@ b{
   }
 }
 
+
+.session-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  padding: 12px;
+  margin-bottom: 10px;
+  
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+}
+
+.session-card strong {
+  font-size: 16px;
+}
+
+.session-card p {
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.exit-btn {
+  background: var(--cor-erro);
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.card-item {
+  background: var(--card);
+  color: var(--texto);
+  border-radius: var(--radius);
+  border: 1px solid var(--borda);
+  box-shadow: var(--sombra);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.2s ease;
+  position: relative;
+}
+
+.card-item:hover {
+  border: 1px solid var(--cor-alerta);
+}
+
+/* STATUS */
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  right: 15px;
+}
+
+/* usa TUAS cores */
+.status.ativo {
+  background: var(--cor-sucesso);
+  color: #fff;
+}
+
+.status.finalizado {
+  background: var(--cor-erro);
+  color: #fff;
+}
+
+/* BODY */
+.card-body small {
+  color: var(--sub);
+  font-size: .85em;
+}
+
+.card-body p {
+  margin: 2px 0 0;
+  font-weight: 500;
+  color: var(--cor-sucesso);
+}
+
+/* FOOTER */
+.card-footer {
+  color: var(--sub);
+  margin-bottom: 10px;
+}
+
+.card-footer .placa{
+  color: var(--texto);
+}
+/* BOTÃO */
+.exit-btn {
+  border: none;
+  background: var(--cor-erro);
+  color: #fff;
+  padding: 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+}
+
+.exit-btn:hover {
+  opacity: .90;
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--sub);
+}

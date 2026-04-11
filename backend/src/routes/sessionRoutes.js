@@ -4,7 +4,7 @@ import {
   registrarEntrada,
   registrarSaida,
   listarHistorico,
-  contarCarrosAtivos,
+  listarCarrosAtivos,
   vagasDisponiveis,
   receitaTotal,
   dashboard,
@@ -49,7 +49,7 @@ router.get("/entradas-por-hora", permitir("admin"), entradasPorHora);
 // DADOS GERAIS (ADMIN + OPERADOR)
 // =============================
 router.get("/historico", permitir("admin", "operador"), listarHistorico);
-router.get("/ativos", permitir("admin", "operador"), contarCarrosAtivos);
+router.get("/ativos", permitir("admin", "operador"), listarCarrosAtivos);
 router.get("/vagas-disponiveis", permitir("admin", "operador"), vagasDisponiveis);
 
 export default router;

@@ -1,22 +1,21 @@
-import { createToast, updateToast, removeToast, confirmarToast } from "../utils/toast.js"
+import { request, getSession, applyPermissions, logOut } from "../utils/main.js";
+import { createToast, updateToast, confirmarToast } from "../utils/toast.js";
 
-const token = localStorage.getItem("token");
-const API = "http://localhost:5000/api/parking";
+/* =========================
+   AUTH
+========================= */
+const session = getSession();
 
-if (!token) {
-  window.location.href = "../auth/auth.html";
+if (!session?.token || !session?.user) {
+  logOut();
 }
 
-const user = JSON.parse(localStorage.getItem("user"))
-if (user.role === "operador") {
-  document.getElementById("btnNovo").style.display = "none"
-  
-  document.querySelector(".parking-edit-btn").style.display = "none"
-  
-  document.querySelectorAll(".only-admin").forEach(a => {
-    a.remove()
-  })
-}
+const { user } = session;
+
+/* =========================
+   PERMISSIONS
+========================= */
+applyPermissions(user);
 
 /* =========================
    ELEMENTOS
@@ -39,13 +38,13 @@ const modalTitle = document.getElementById("modalTitle");
    ESTADO
 ========================= */
 let editId = null;
+
 /* =========================
    MODAL
 ========================= */
 function abrirModal(titulo = "Novo Parque") {
   modal.style.display = "flex";
   modalTitle.textContent = titulo;
-  
   btnSalvar.textContent = editId ? "Atualizar" : "Salvar";
 }
 
@@ -68,20 +67,14 @@ function limpar() {
 ========================= */
 async function listar() {
   try {
-    const res = await fetch(API, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const res = await request("/parking");
     
-    const data = await res.json();
-    
-    if (!res.ok) {
-      throw new Error(data.message || "Erro ao buscar estacionamento");
+    if (!res.success) {
+      throw new Error(res.message);
     }
     
-    const lista = data.estacionamentos || [];
-    
+    const lista = res?.estacionamentos || [];
+
     cardList.innerHTML = "";
     
     lista.forEach(item => {
@@ -97,7 +90,8 @@ async function listar() {
         "—";
       
       card.querySelector(".parking-status").textContent =
-        item.ativo || "ativo"
+        item.ativo || "ativo";
+      
       card.querySelector(".parking-vagas").textContent = item.totalVaga || 0;
       card.querySelector(".parking-disponivel").textContent = item.vagasDisponiveis || 0;
       card.querySelector(".parking-preco").textContent = item.precoPorHora || 0;
@@ -105,7 +99,7 @@ async function listar() {
       
       /* EDITAR */
       card.querySelector(".parking-edit-btn").onclick = () => {
-        editId = item._id; // ✅ CORRETO
+        editId = item._id;
         
         nome.value = item.nome;
         endereco.value = item.endereco;
@@ -120,6 +114,7 @@ async function listar() {
     
   } catch (err) {
     console.error(err.message);
+    createToast(err.message, "erro");
   }
 }
 
@@ -130,24 +125,15 @@ async function criar() {
   const toastId = createToast("A criar parque...", "info");
   
   try {
-    const res = await fetch(API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        nome: nome.value,
-        endereco: endereco.value,
-        totalVaga: Number(vagas.value),
-        precoPorHora: Number(preco.value)
-      })
+    const res = await request("/parking", "POST", {
+      nome: nome.value,
+      endereco: endereco.value,
+      totalVaga: Number(vagas.value),
+      precoPorHora: Number(preco.value)
     });
     
-    const data = await res.json();
-    
-    if (!res.ok) {
-      throw new Error(data.message || "Erro ao criar estacionamento");
+    if (!res.success) {
+      throw new Error(res.message);
     }
     
     updateToast(toastId, "Criado com sucesso", "sucesso");
@@ -165,37 +151,23 @@ async function criar() {
    EDITAR
 ========================= */
 async function editar() {
-  
   try {
-    if (!editId) {
-      throw new Error("ID inválido para edição");
-    }
+    if (!editId) throw new Error("ID inválido para edição");
     
     const confirmou = await confirmarToast("Deseja atualizar este parque?");
-
-if (!confirmou) return;
-  const toastId = createToast("A atualizar...", "info");
-
-editar();
+    if (!confirmou) return;
     
-    const res = await fetch(`${API}/${editId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        nome: nome.value,
-        endereco: endereco.value,
-        totalVaga: Number(vagas.value),
-        precoPorHora: Number(preco.value)
-      })
+    const toastId = createToast("A atualizar...", "info");
+    
+    const res = await request(`/parking/${editId}`, "PUT", {
+      nome: nome.value,
+      endereco: endereco.value,
+      totalVaga: Number(vagas.value),
+      precoPorHora: Number(preco.value)
     });
     
-    const data = await res.json();
-    
-    if (!res.ok) {
-      throw new Error(data.message || "Erro ao atualizar");
+    if (!res.success) {
+      throw new Error(res.message);
     }
     
     updateToast(toastId, "Atualizado com sucesso", "sucesso");
@@ -207,7 +179,7 @@ editar();
     listar();
     
   } catch (err) {
-    updateToast(toastId, err.message, "erro");
+    createToast(err.message, "erro");
   }
 }
 
@@ -238,33 +210,33 @@ btnSalvar.onclick = () => {
    VALIDAÇÃO
 ========================= */
 function validarCampos() {
-  const erros = [];
-  
   const nomeVal = nome.value.trim();
   const enderecoVal = endereco.value.trim();
   const vagasVal = Number(vagas.value);
   const precoVal = Number(preco.value);
   
   if (!nomeVal) {
-    erros.push("Nome é obrigatório");
-  } else if (nomeVal.length < 3) {
-    erros.push("Nome deve ter pelo menos 3 caracteres");
+    createToast("Nome é obrigatório", "erro");
+    return false;
+  }
+  
+  if (nomeVal.length < 3) {
+    createToast("Nome deve ter pelo menos 3 caracteres", "erro");
+    return false;
   }
   
   if (!enderecoVal) {
-    erros.push("Endereço é obrigatório");
+    createToast("Endereço é obrigatório", "erro");
+    return false;
   }
   
   if (!vagas.value || isNaN(vagasVal) || vagasVal <= 0) {
-    erros.push("Vagas deve ser maior que 0");
+    createToast("Vagas deve ser maior que 0", "erro");
+    return false;
   }
   
   if (!preco.value || isNaN(precoVal) || precoVal <= 0) {
-    erros.push("Preço deve ser maior que 0");
-  }
-  
-  if (erros.length > 0) {
-    createToast(erros[0], "erro");
+    createToast("Preço deve ser maior que 0", "erro");
     return false;
   }
   
@@ -272,6 +244,6 @@ function validarCampos() {
 }
 
 /* =========================
-   INICIAR
+   INIT
 ========================= */
 listar();

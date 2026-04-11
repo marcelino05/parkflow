@@ -1,193 +1,156 @@
-import { createToast, updateToast, removeToast } from "../utils/toast.js"
+import { request, getSession, logOut, setSession } from "../utils/main.js";
+import { createToast, updateToast } from "../utils/toast.js";
 
-const token = localStorage.getItem("token")
+/* =========================
+   PROTEÇÃO
+========================= */
+const { token } = getSession();
 
 if (!token) {
-  window.location.href = "../auth/auth.html"
+  logOut();
 }
 
+/* =========================
+   FORM SUBMIT
+========================= */
 document.getElementById("empresaForm").addEventListener("submit", (e) => {
-  e.preventDefault()
-  createCompany()
-})
+  e.preventDefault();
+  createCompany();
+});
 
 /* =========================
    CRIAR EMPRESA
 ========================= */
 const createCompany = async () => {
-  const companyName = document.getElementById("name").value
-  const companyEmail = document.getElementById("email").value
-  const companyPhone = document.getElementById("phone").value
-  const companyAddress = document.getElementById("address").value
   
-  //  Validações
-  const validName = validateCompanyName(companyName)
-  const validEmail = validateCompanyEmail(companyEmail)
-  const validPhone = validateCompanyPhone(companyPhone)
-  const validAddress = validateCompanyAddress(companyAddress)
+  const companyName = document.getElementById("name").value;
+  const companyEmail = document.getElementById("email").value;
+  const companyPhone = document.getElementById("phone").value;
+  const companyAddress = document.getElementById("address").value;
   
-  // Nome
-  if (!validName.valid) {
-    return createToast(validName.errors[0], "erro")
-  }
+  // VALIDAÇÕES
+  const validName = validateCompanyName(companyName);
+  const validEmail = validateCompanyEmail(companyEmail);
+  const validPhone = validateCompanyPhone(companyPhone);
+  const validAddress = validateCompanyAddress(companyAddress);
   
-  // Email
-  if (validEmail) {
-    return createToast(validEmail, "erro")
-  }
+  if (!validName.valid) return createToast(validName.errors[0], "erro");
+  if (validEmail) return createToast(validEmail, "erro");
+  if (validPhone) return createToast(validPhone, "erro");
+  if (validAddress) return createToast(validAddress, "erro");
   
-  // Telefone
-  if (validPhone) {
-    return createToast(validPhone, "erro")
-  }
-  
-  //  Endereço
-  if (validAddress) {
-    return createToast(validAddress, "erro")
-  }
-  
-  //  Enviar para API
   await sendCompanyToAPI({
     nome: companyName.trim(),
     email: companyEmail.trim(),
     telefone: companyPhone.trim(),
     endereco: companyAddress.trim()
-  })
-}
+  });
+};
+
+/* =========================
+   API
+========================= */
+const sendCompanyToAPI = async (payload) => {
+  const toastId = createToast("A criar empresa...", "info");
+  
+  try {
+    const res = await request("/company", "POST", payload);
+    
+    if (!res.success) {
+      return updateToast(toastId, res.message, "erro");
+    }
+    
+    updateToast(toastId, "Empresa criada com sucesso", "sucesso");
+    
+    // 🔥 se backend devolver token novo
+    if (res.token) {
+      setSession(res.token, { role: "admin" });
+    }
+    
+    setTimeout(() => {
+      window.location.href = "../dashboard/dashboard.html";
+    }, 1500);
+    
+    clearfields("empresaForm");
+    
+  } catch (error) {
+    updateToast(toastId, error.message, "erro");
+  }
+};
 
 /* =========================
    VALIDAÇÕES
 ========================= */
 
 const validateCompanyName = (name) => {
-  const errors = []
+  const errors = [];
   
   if (typeof name !== "string") {
-    return { valid: false, errors: ["Nome inválido"] }
+    return { valid: false, errors: ["Nome inválido"] };
   }
   
-  const trimmed = name.trim()
+  const trimmed = name.trim();
   
-  if (!trimmed) {
-    errors.push("Nome da empresa é obrigatório")
-  }
+  if (!trimmed) errors.push("Nome da empresa é obrigatório");
+  if (trimmed.length < 3) errors.push("Nome deve ter pelo menos 3 caracteres");
+  if (trimmed.length > 50) errors.push("Nome muito longo");
   
-  if (trimmed.length < 3) {
-    errors.push("Nome deve ter pelo menos 3 caracteres")
-  }
-  
-  if (trimmed.length > 50) {
-    errors.push("Nome muito longo")
-  }
-  
-  const regex = /^[a-zA-ZÀ-ÿ0-9\s]+$/
+  const regex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
   
   if (!regex.test(trimmed)) {
-    errors.push("Nome contém caracteres inválidos")
+    errors.push("Nome contém caracteres inválidos");
   }
   
   return {
     valid: errors.length === 0,
     errors
-  }
-}
+  };
+};
 
 const validateCompanyEmail = (email) => {
-  if (!email) return "Email obrigatório"
+  if (!email) return "Email obrigatório";
   
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
-  if (!regex.test(email)) return "Email inválido"
+  if (!regex.test(email)) return "Email inválido";
   
-  return null
-}
+  return null;
+};
 
 const validateCompanyPhone = (phone) => {
-  if (typeof phone !== "string") return "Telefone inválido"
+  if (typeof phone !== "string") return "Telefone inválido";
   
-  let value = phone.trim()
+  let value = phone.trim();
   
-  if (!value) return "Telefone obrigatório"
+  if (!value) return "Telefone obrigatório";
   
-  // Remove código do país
-  if (value.startsWith("+258")) {
-    value = value.slice(4)
-  } else if (value.startsWith("258")) {
-    value = value.slice(3)
-  }
+  // remove +258 ou 258
+  if (value.startsWith("+258")) value = value.slice(4);
+  else if (value.startsWith("258")) value = value.slice(3);
   
-  const regex = /^(82|83|84|85|86|87)\d{7}$/
+  const regex = /^(82|83|84|85|86|87)\d{7}$/;
   
-  if (!regex.test(value)) return "Telefone inválido"
+  if (!regex.test(value)) return "Telefone inválido";
   
-  return null
-}
+  return null;
+};
 
 const validateCompanyAddress = (address) => {
-  if (typeof address !== "string") return "Endereço inválido"
+  if (typeof address !== "string") return "Endereço inválido";
   
-  const value = address.trim()
+  const value = address.trim();
   
-  if (!value) return "Endereço obrigatório"
+  if (!value) return "Endereço obrigatório";
+  if (value.length < 5) return "Endereço muito curto";
+  if (value.length > 100) return "Endereço muito longo";
   
-  if (value.length < 5) return "Endereço muito curto"
-  
-  if (value.length > 100) return "Endereço muito longo"
-  
-  return null
-}
+  return null;
+};
 
 /* =========================
-PI
+   LIMPAR FORM
 ========================= */
-
-const sendCompanyToAPI = async (data) => {
-  const toastId = createToast("A criar empresa...", "info")
-  
-  try {
-    const response = await fetch("http://localhost:5000/api/company", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify(data)
-    })
-    
-    const result = await response.json()
-    
-    if (!response.ok) {
-      updateToast(toastId, result.message || "Erro ao criar empresa", "erro")
-      return
-    }
-    
-    updateToast(toastId, "Empresa criada com sucesso", "sucesso")
-      //  guardar token
-  if (!data.token) return
-  
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    // opcional: mostrar mensagem de sucesso aqui
-    setTimeout(() => {
-      window.location.href = "../dashboard/dashboard.html";
-    }, 1500);
-  } else {
-    console.error("Token não recebido");
-  }
-  
-    clearfields("empresaForm")
-    
-  } catch (error) {
-    updateToast(toastId, "Erro de conexão com a API", "erro")
-    console.error(error)
-  }
-}
-
-/* =========================
-   LIMPAR FORMULÁRIO
-========================= */
-
 const clearfields = (formId) => {
-  const form = document.getElementById(formId)
-  if (form) form.reset()
-}
+  const form = document.getElementById(formId);
+  if (form) form.reset();
+};

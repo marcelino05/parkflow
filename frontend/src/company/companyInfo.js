@@ -1,30 +1,33 @@
+import { request, getSession, logOut } from "../utils/main.js";
 import { createToast, updateToast } from "../utils/toast.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   
-  const token = localStorage.getItem("token");
+  /* ==============================
+     AUTH
+  ============================== */
+  const session = getSession();
   
-  // ==============================
-  // SEM TOKEN → LOGIN
-  // ==============================
-  if (!token) {
+  if (!session?.token || !session?.user) {
     createToast("Acesso negado. Faça login", "erro");
     
     setTimeout(() => {
-      window.location.href = "../auth/auth.html";
+      logOut();
     }, 1500);
     
     return;
   }
   
-   const user = JSON.parse(localStorage.getItem("user"))
- if(user.role !== "admin"){
-   window.location.href = "../session/sessao.html"
- }
- 
-  // ==============================
-  // ELEMENTOS
-  // ==============================
+  const { user } = session;
+  
+  if (user.role !== "admin") {
+    window.location.href = "../session/sessao.html";
+    return;
+  }
+  
+  /* ==============================
+     ELEMENTOS
+  ============================== */
   const companyName = document.getElementById("companyName");
   const companyOwner = document.getElementById("companyOwner");
   const companyEmail = document.getElementById("companyEmail");
@@ -46,9 +49,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const textOperators = document.getElementById("textOperators");
   const textSpots = document.getElementById("textSpots");
   
-  // ==============================
-  // MODAL
-  // ==============================
+  /* ==============================
+     MODAL
+  ============================== */
   const modal = document.getElementById("companyModal");
   const btnEdit = document.getElementById("btnEditCompany");
   const btnCancel = document.getElementById("btnCancel");
@@ -64,9 +67,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const errorPhone = document.getElementById("errorPhone");
   const errorAddress = document.getElementById("errorAddress");
   
-  // ==============================
-  // LIMPAR ERROS
-  // ==============================
+  /* ==============================
+     UTIL
+  ============================== */
   function limparErros() {
     errorName.textContent = "";
     errorEmail.textContent = "";
@@ -79,9 +82,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputAddress.classList.remove("input-error");
   }
   
-  // ==============================
-  // VALIDAR
-  // ==============================
   function validar() {
     let valido = true;
     
@@ -114,77 +114,67 @@ document.addEventListener("DOMContentLoaded", async () => {
     return valido;
   }
   
-  // ==============================
-  // CARREGAR EMPRESA
-  // ==============================
-  async function carregarEmpresa() {
+  function formatarData(data) {
+    return new Date(data).toLocaleDateString("pt-MZ");
+  }
+  
+  function atualizarBarra(barra, texto, total) {
+    const usados = 0;
+    const percent = total === 0 ? 0 : (usados / total) * 100;
     
+    barra.style.width = percent + "%";
+    texto.textContent = `${usados} / ${total}`;
+    
+    if (percent < 50) barra.style.background = "green";
+    else if (percent < 80) barra.style.background = "orange";
+    else barra.style.background = "red";
+  }
+  
+  /* ==============================
+     CARREGAR EMPRESA
+  ============================== */
+  async function carregarEmpresa() {
     const toastId = createToast("A carregar empresa...", "info");
     
     try {
-      const [resEmpresa, resStatus] = await Promise.all([
-        fetch("http://localhost:5000/api/company", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }),
-        fetch("http://localhost:5000/api/company/status", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+      const [empresaRes, statusRes] = await Promise.all([
+        request("/company"),
+        request("/company/status")
       ]);
       
-      if (resEmpresa.status === 401 || resStatus.status === 401) {
-        localStorage.removeItem("token");
-        
-        updateToast(toastId, "Sessão inválida. Faça login novamente", "erro");
-        
-        setTimeout(() => {
-          window.location.href = "../auth/auth.html";
-        }, 1500);
-        
-        return;
+      if (!empresaRes.success || !statusRes.success) {
+        throw new Error("Erro ao carregar dados");
       }
       
-      const dataEmpresa = await resEmpresa.json();
-      const dataStatus = await resStatus.json();
-      
-      if (!dataEmpresa.success || !dataStatus.success) {
-        throw new Error("Erro na API");
-      }
-      
-      const empresa = dataEmpresa.empresa;
+      const empresa = empresaRes.data?.empresa;
+      const status = statusRes.data;
       
       companyName.textContent = empresa.nome;
-      companyOwner.textContent = dataEmpresa.nomeProprietario;
+      companyOwner.textContent = empresaRes.data?.nomeProprietario;
       companyEmail.textContent = empresa.email;
       companyPhone.textContent = empresa.telefone;
       companyAddress.textContent = empresa.endereco;
       
-      companyPlanoNome.textContent = dataStatus.plano;
-      companyPlanoAtivo.textContent = dataStatus.status;
+      companyPlanoNome.textContent = status.plano;
+      companyPlanoAtivo.textContent = status.status;
       
-      // limpar classes antes
       companyPlanoAtivo.classList.remove("sucesso", "erro");
       
-      // aplicar cor conforme status
-      if (dataStatus.status === "ativo") {
+      if (status.status === "ativo") {
         companyPlanoAtivo.classList.add("sucesso");
       } else {
         companyPlanoAtivo.classList.add("erro");
       }
-      companyDiasRestantes.textContent = dataStatus.diasRestantes;
-      const dias = Number(companyDiasRestantes.textContent);
       
-      // limpa classes antes
+      companyDiasRestantes.textContent = status.diasRestantes;
+      
+      const dias = Number(status.diasRestantes);
+      
       companyDiasRestantes.classList.remove("alerta-laranja", "alerta-vermelho");
       
-      // aplica cor conforme valor
       if (dias <= 3) {
         companyDiasRestantes.classList.add("alerta-vermelho");
-      }
-      else if (dias <= 7) {
+      } else if (dias <= 7) {
         companyDiasRestantes.classList.add("alerta-laranja");
       }
       
@@ -199,33 +189,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       
     } catch (error) {
       console.error(error);
-      updateToast(toastId, "Erro ao carregar empresa", "erro");
+      updateToast(toastId, error.message, "erro");
     }
   }
   
-  function atualizarBarra(barra, texto, total) {
-    
-    const usados = 0;
-    
-    const percent = total === 0 ? 0 : (usados / total) * 100;
-    
-    barra.style.width = percent + "%";
-    texto.textContent = `${usados} / ${total}`;
-    
-    if (percent < 50) barra.style.background = "green";
-    else if (percent < 80) barra.style.background = "orange";
-    else barra.style.background = "red";
-  }
-  
-  function formatarData(data) {
-    return new Date(data).toLocaleDateString("pt-MZ");
-  }
-  
-  // ==============================
-  // ABRIR MODAL
-  // ==============================
-  btnEdit.addEventListener("click", () => {
-    
+  /* ==============================
+     MODAL
+  ============================== */
+  btnEdit?.addEventListener("click", () => {
     inputName.value = companyName.textContent;
     inputEmail.value = companyEmail.textContent;
     inputPhone.value = companyPhone.textContent;
@@ -234,17 +205,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.classList.add("show");
   });
   
-  // ==============================
-  // FECHAR MODAL
-  // ==============================
-  btnCancel.addEventListener("click", () => {
+  btnCancel?.addEventListener("click", () => {
     modal.classList.remove("show");
   });
   
-  // ==============================
-  // SALVAR
-  // ==============================
-  btnSave.addEventListener("click", async () => {
+  /* ==============================
+     SALVAR
+  ============================== */
+  btnSave?.addEventListener("click", async () => {
     
     if (!validar()) {
       createToast("Preencha corretamente os campos", "erro");
@@ -254,35 +222,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const toastId = createToast("A guardar empresa...", "info");
     
     try {
-      
-      const res = await fetch("http://localhost:5000/api/company", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          nome: inputName.value,
-          email: inputEmail.value,
-          telefone: inputPhone.value,
-          endereco: inputAddress.value
-        })
+      const res = await request("/company", "PUT", {
+        nome: inputName.value,
+        email: inputEmail.value,
+        telefone: inputPhone.value,
+        endereco: inputAddress.value
       });
       
-      const text = await res.text();
-      
-      let data = null;
-      
-      try {
-        data = JSON.parse(text);
-      } catch {}
-      
-      if (!res.ok) {
-        throw new Error("Erro HTTP: " + res.status);
-      }
-      
-      if (data && data.success === false) {
-        throw new Error(data.message || "Erro ao atualizar empresa");
+      if (!res.success) {
+        throw new Error(res.message);
       }
       
       updateToast(toastId, "Empresa atualizada com sucesso", "sucesso");
@@ -295,13 +243,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       companyAddress.textContent = inputAddress.value;
       
     } catch (error) {
-      updateToast(toastId, error.message || "Erro ao atualizar empresa", "erro");
+      updateToast(toastId, error.message, "erro");
     }
   });
   
-  // ==============================
-  // INICIALIZAR
-  // ==============================
+  /* ==============================
+     INIT
+  ============================== */
   carregarEmpresa();
   
 });
