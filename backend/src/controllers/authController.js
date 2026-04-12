@@ -212,7 +212,7 @@ export const esqueciSenha = async (req, res, next) => {
 
     await usuario.save();
 
-    const link = `http://localhost:5000/resetar-senha.html?token=${resetToken}`;
+    const link = `http://localhost:7700/parkflow/src/auth/reset-password.html?token=${resetToken}`;
 
     await enviarEmail(
       usuario.email,
@@ -325,5 +325,4 @@ export const redefinirSenha = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
 };

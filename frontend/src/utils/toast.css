@@ -1,9 +1,9 @@
 :root {
   /* BORDAS (vivas) */
-  --cor-info: #60A5FA;
-  --cor-sucesso: #4ADE80;
-  --cor-alerta: #FBBF24;
-  --cor-erro: #FF3333;
+  --info: #60A5FA;
+  --sucesso: #4ADE80;
+  --alerta: #FBBF24;
+  --erro: #FF3333;
   
   /* BACKGROUND (escuro suficiente para texto branco) */
   --cor-info-bg: rgba(37, 99, 235, 0.65);
