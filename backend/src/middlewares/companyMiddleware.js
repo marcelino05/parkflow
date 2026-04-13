@@ -34,18 +34,14 @@ export const verificarEmpresa = async (req, res, next) => {
       });
     }
 
-    if (!empresa.trialFim) {
-      return res.status(500).json({
-        success: false, message: "Erro na configuração do trial"
-      })
-    }
-
     const hoje = new Date();
-    const fimTrial = new Date(empresa.trialFim).getTime()
 
-    // 🚨 TRIAL EXPIRADO
-    if (empresa.plano === "trial" && empresa.trialFim && hoje > empresa.trialFim) {
-
+    // TRIAL EXPIRADO
+    if (
+      empresa.plano === "trial" &&
+      empresa.trialFim &&
+      hoje > new Date(empresa.trialFim)
+    ) {
       empresa.status = "suspenso";
       await empresa.save();
 
@@ -54,13 +50,13 @@ export const verificarEmpresa = async (req, res, next) => {
         message: "Trial expirado. Efetue o pagamento."
       });
     }
-    // plano pago expirado
+
+    // PLANO EXPIRADO
     if (
       empresa.plano !== "trial" &&
       empresa.dataExpiracaoPlano &&
-      hoje > empresa.dataExpiracaoPlano
+      hoje > new Date(empresa.dataExpiracaoPlano)
     ) {
-
       empresa.status = "suspenso";
       await empresa.save();
 
@@ -69,7 +65,7 @@ export const verificarEmpresa = async (req, res, next) => {
         message: "Plano expirado. Efetue o pagamento."
       });
     }
-    // salvar no request
+
     req.empresaId = empresa._id
 
     next()

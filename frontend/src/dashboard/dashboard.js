@@ -134,7 +134,7 @@ async function getCompanyName() {
     if (!res.success) return;
 
     document.getElementById("companyName").textContent =
-      res.data?.empresa?.nome || "Empresa";
+      res.empresa?.nome || "Empresa";
 
   } catch (err) {
     console.error("Erro empresa:", err.message);

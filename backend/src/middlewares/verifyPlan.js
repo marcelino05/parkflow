@@ -17,37 +17,7 @@ export const verifyPlan = async (req, res, next) => {
       });
     }
 
-    const agora = new Date();
-
-    // 🔴 TRIAL
-    if (empresa.plano === "trial") {
-      if (empresa.trialFim && agora > empresa.trialFim) {
-        empresa.status = "suspenso";
-        await empresa.save();
-
-        return res.status(403).json({
-          success: false,
-          message: "Trial expirado. Faça upgrade."
-        });
-      }
-    }
-
-    // 🔴 PLANO PAGO
-    if (empresa.plano !== "trial") {
-      if (
-        empresa.dataExpiracaoPlano &&
-        agora > empresa.dataExpiracaoPlano
-      ) {
-        empresa.status = "suspenso";
-        await empresa.save();
-
-        return res.status(403).json({
-          success: false,
-          message: "Plano expirado. Efetue pagamento."
-        });
-      }
-    }
-
+    //  bloqueio prioritário
     if (empresa.status === "suspenso") {
       return res.status(403).json({
         success: false,
@@ -55,13 +25,46 @@ export const verifyPlan = async (req, res, next) => {
       });
     }
 
-    // 🔥 IMPORTANTE
+    const agora = new Date();
+
+    // TRIAL EXPIRADO
+    if (
+      empresa.plano === "trial" &&
+      empresa.trialFim &&
+      agora > new Date(empresa.trialFim)
+    ) {
+      empresa.status = "suspenso";
+      await empresa.save();
+
+      return res.status(403).json({
+        success: false,
+        message: "Trial expirado. Faça upgrade."
+      });
+    }
+
+    //  PLANO EXPIRADO
+    if (
+      empresa.plano !== "trial" &&
+      empresa.dataExpiracaoPlano &&
+      agora > new Date(empresa.dataExpiracaoPlano)
+    ) {
+      empresa.status = "suspenso";
+      await empresa.save();
+
+      return res.status(403).json({
+        success: false,
+        message: "Plano expirado. Efetue pagamento."
+      });
+    }
+
+    //  injetar dados no request (SEM ALTERAR NOMES)
     req.empresa = empresa;
+    req.limites = planLimits[empresa.plano] || planLimits.trial;
 
     next();
 
   } catch (erro) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: erro.message
     });
@@ -77,7 +80,7 @@ export const checkPlanLimits = (tipo) => {
       const empresa = req.empresa;
       const empresaId = empresa._id;
 
-      const limites = planLimits[empresa.plano];
+      const limites = req.limites || planLimits[empresa.plano];
 
       if (!limites) {
         return res.status(400).json({
@@ -86,29 +89,61 @@ export const checkPlanLimits = (tipo) => {
         });
       }
 
-      // 🔹 ESTACIONAMENTO
-      if (tipo === "parking") {
-        const total = await Parking.countDocuments({ empresaId });
+      let usado = 0;
+      let max = 0;
 
-        if (total >= limites.maxEstacionamentos) {
+      if (tipo === "parking") {
+        usado = await Parking.countDocuments({ empresaId });
+        max = limites.maxEstacionamentos;
+
+        if (usado >= max) {
           return res.status(403).json({
             success: false,
-            message: "Limite de estacionamentos atingido"
+            message: "Limite de estacionamentos atingido",
+            limite: max,
+            usado
           });
         }
       }
 
-      // 🔹 OPERADOR
       if (tipo === "operador") {
-        const total = await User.countDocuments({
+        usado = await User.countDocuments({
           empresaId,
           role: "operador"
         });
 
-        if (total >= limites.maxOperadores) {
+        max = limites.maxOperadores;
+
+        if (usado >= max) {
           return res.status(403).json({
             success: false,
-            message: "Limite de operadores atingido"
+            message: "Limite de operadores atingido",
+            limite: max,
+            usado
+          });
+        }
+      }
+
+      if (tipo === "vagas") {
+        const result = await Parking.aggregate([
+          { $match: { empresaId } },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$totalVaga" }
+            }
+          }
+        ]);
+
+        usado = result[0]?.total || 0;
+        max = limites.maxVagas;
+
+        if (usado >= max) {
+          return res.status(403).json({
+            success: false,
+            message: "Limite de vagas atingido",
+            limite: max,
+            usado
           });
         }
       }
@@ -116,7 +151,7 @@ export const checkPlanLimits = (tipo) => {
       next();
 
     } catch (erro) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: erro.message
       });

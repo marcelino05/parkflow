@@ -40,4 +40,8 @@
 
 .logo {
   color: var(--cor-primaria);
+  font-weight: bolder;
+}
+.logo b{
+  color: var(--cor-sucesso);
 }

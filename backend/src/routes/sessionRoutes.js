@@ -28,26 +28,22 @@ import {
 
 const router = express.Router();
 
-//  proteção global (todas rotas passam aqui)
+// proteção global
 router.use(verificarToken, verificarEmpresa, verifyPlan);
 
-// =============================
-//  OPERAÇÕES (ADMIN + OPERADOR)
-// =============================
-router.post("/entrada", permitir("admin", "operador"), checkPlanLimits("sessao"), registrarEntrada);
-router.post("/saida", permitir("admin", "operador"), registrarSaida);
+// OPERAÇÕES
+router.post("/entrada", permitir("admin", "operador"), checkPlanLimits("vagas"), registrarEntrada);
 
-// =============================
-//  DASHBOARD / RELATÓRIOS (ADMIN)
-// =============================
+router.post("/saida", permitir("admin", "operador"),
+  registrarSaida);
+
+// DASHBOARD (ADMIN)
 router.get("/dashboard", permitir("admin"), dashboard);
 router.get("/receita-total", permitir("admin"), receitaTotal);
 router.get("/receita", permitir("admin"), receitaPorPeriodo);
 router.get("/entradas-por-hora", permitir("admin"), entradasPorHora);
 
-// =============================
-// DADOS GERAIS (ADMIN + OPERADOR)
-// =============================
+// DADOS GERAIS
 router.get("/historico", permitir("admin", "operador"), listarHistorico);
 router.get("/ativos", permitir("admin", "operador"), listarCarrosAtivos);
 router.get("/vagas-disponiveis", permitir("admin", "operador"), vagasDisponiveis);

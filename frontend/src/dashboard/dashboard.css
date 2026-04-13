@@ -53,7 +53,7 @@
   
   .sidebar a:hover {
     background: var(--cor-primaria-hover);
-    
+    color: #fff;
   }
   
   /* LAYOUT */

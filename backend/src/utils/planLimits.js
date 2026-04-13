@@ -4,14 +4,20 @@ export default {
     maxVagas: 20,
     maxOperadores: 1
   },
-  basico: {
 
+  basico: {
     maxEstacionamentos: 3,
     maxVagas: 100,
     maxOperadores: 5
   },
 
   pro: {
+    maxEstacionamentos: 7,
+    maxVagas: 300,
+    maxOperadores: 10
+  },
+
+  premium: {
     maxEstacionamentos: 9999,
     maxVagas: 9999,
     maxOperadores: 9999

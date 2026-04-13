@@ -134,41 +134,43 @@ document.addEventListener("DOMContentLoaded", async () => {
      CARREGAR EMPRESA
   ============================== */
   async function carregarEmpresa() {
-    const toastId = createToast("A carregar empresa...", "info");
+    const toastId = createToast("Carregando dados da empresa...", "info");
     
     try {
-      const [empresaRes, statusRes] = await Promise.all([
-        request("/company"),
-        request("/company/status")
-      ]);
+      const planoEmpresa = await request("/company/status");
+      const dadosEmpresa = await request("/company");
+      const resUso = await request("/company/uso");
+      const uso = resUso?.uso;
       
-      if (!empresaRes.success || !statusRes.success) {
-        throw new Error("Erro ao carregar dados");
+      if (!dadosEmpresa?.success || !planoEmpresa?.success) {
+        throw new Error("Erro ao carregar dados da empresa");
       }
       
-      const empresa = empresaRes.data?.empresa;
-      const status = statusRes.data;
+      const empresa = dadosEmpresa?.empresa;
+      
+      if (!empresa) {
+        throw new Error("Empresa não encontrada");
+      }
       
       companyName.textContent = empresa.nome;
-      companyOwner.textContent = empresaRes.data?.nomeProprietario;
+      companyOwner.textContent = empresa?.proprietarioId?.nome || "-";
       companyEmail.textContent = empresa.email;
       companyPhone.textContent = empresa.telefone;
       companyAddress.textContent = empresa.endereco;
       
-      companyPlanoNome.textContent = status.plano;
-      companyPlanoAtivo.textContent = status.status;
+      companyPlanoNome.textContent = planoEmpresa.plano;
+      companyPlanoAtivo.textContent = planoEmpresa.status;
       
       companyPlanoAtivo.classList.remove("sucesso", "erro");
       
-      if (status.status === "ativo") {
+      if (planoEmpresa.status === "ativo") {
         companyPlanoAtivo.classList.add("sucesso");
       } else {
         companyPlanoAtivo.classList.add("erro");
       }
       
-      companyDiasRestantes.textContent = status.diasRestantes;
-      
-      const dias = Number(status.diasRestantes);
+      const dias = Number(planoEmpresa.diasRestantes || 0);
+      companyDiasRestantes.textContent = `${dias} dias`;
       
       companyDiasRestantes.classList.remove("alerta-laranja", "alerta-vermelho");
       
@@ -178,12 +180,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         companyDiasRestantes.classList.add("alerta-laranja");
       }
       
-      companyPlanoInicio.textContent = formatarData(empresa.trialInicio);
-      companyPlanoFim.textContent = formatarData(empresa.trialFim);
+      companyPlanoInicio.textContent = formatarData(empresa.criadoEm);
+      companyPlanoFim.textContent = formatarData(empresa.dataExpiracaoPlano);
       
-      atualizarBarra(barParking, textParking, empresa.limites.maxEstacionamentos);
-      atualizarBarra(barOperators, textOperators, empresa.limites.maxOperadores);
-      atualizarBarra(barSpots, textSpots, empresa.limites.maxVagas);
+      function atualizarBarra(barra, texto, total, usados) {
+        const percent = total === 0 ? 0 : (usados / total) * 100;
+        
+        barra.style.width = percent + "%";
+        texto.textContent = `${usados} / ${total}`;
+        
+        if (percent < 50) barra.style.background = "green";
+        else if (percent < 80) barra.style.background = "orange";
+        else barra.style.background = "red";
+      }
+      //ESTACIONAMENTO
+      atualizarBarra(
+        barParking,
+        textParking,
+        uso?.estacionamentos?.limite || 0,
+        uso?.estacionamentos?.usado || 0
+      );
+      
+      //OPERADORES
+      
+      atualizarBarra(
+        barOperators,
+        textOperators,
+        uso?.operadores?.limite || 0,
+        uso?.operadores?.usado || 0
+      );
+      
+      
+      //VAGAS
+      atualizarBarra(
+        barSpots,
+        textSpots,
+        uso?.vagas?.limite || 0,
+        uso?.vagas?.usado || 0
+      );
       
       updateToast(toastId, "Empresa carregada com sucesso", "sucesso");
       
@@ -197,6 +231,8 @@ document.addEventListener("DOMContentLoaded", async () => {
      MODAL
   ============================== */
   btnEdit?.addEventListener("click", () => {
+    limparErros();
+    
     inputName.value = companyName.textContent;
     inputEmail.value = companyEmail.textContent;
     inputPhone.value = companyPhone.textContent;
@@ -219,6 +255,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     
+    btnSave.disabled = true;
+    
     const toastId = createToast("A guardar empresa...", "info");
     
     try {
@@ -229,8 +267,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         endereco: inputAddress.value
       });
       
-      if (!res.success) {
-        throw new Error(res.message);
+      if (!res?.success) {
+        throw new Error(res?.message || "Erro ao atualizar empresa");
       }
       
       updateToast(toastId, "Empresa atualizada com sucesso", "sucesso");
@@ -244,6 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       
     } catch (error) {
       updateToast(toastId, error.message, "erro");
+    } finally {
+      btnSave.disabled = false;
     }
   });
   

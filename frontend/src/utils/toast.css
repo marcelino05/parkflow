@@ -1,15 +1,15 @@
 :root {
   /* BORDAS (vivas) */
-  --info: #60A5FA;
+  --info: #53B2FF;
   --sucesso: #4ADE80;
   --alerta: #FBBF24;
   --erro: #FF3333;
   
   /* BACKGROUND (escuro suficiente para texto branco) */
-  --cor-info-bg: rgba(37, 99, 235, 0.65);
-  --cor-sucesso-bg: rgba(22, 163, 74, 0.65);
-  --cor-alerta-bg: rgba(245, 158, 11, 0.65);
-  --cor-erro-bg: rgba(220, 38, 38, 0.65);
+  --cor-info-bg: rgba(37, 99, 235, 0.60);
+  --cor-sucesso-bg: rgba(22, 163, 74, 0.60);
+  --cor-alerta-bg: rgba(245, 158, 11, 0.60);
+  --cor-erro-bg: rgba(220, 38, 38, 0.60);
 }
 
 .toast-container {
@@ -28,7 +28,7 @@
 
 
 .toast {
-  padding: 12px 24px;
+  padding: 12px 15px;
   border-radius: 10px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -47,25 +47,25 @@
 
 /*TIPOS DE TOAST*/
 .toast.sucesso {
-  border-left: 6px solid var(--cor-sucesso);
+  border-left: 10px solid var(--sucesso);
   background: var(--cor-sucesso-bg);
   
 }
 
 .toast.info {
-  border-left: 6px solid var(--cor-info);
+  border-left: 10px solid var(--info);
   background: var(--cor-info-bg);
   
 }
 
 .toast.alert {
-  border-left: 6px solid var(--cor-alerta);
+  border-left: 10px solid var(--alerta);
   background: var(--cor-alerta-bg);
   
 }
 
 .toast.erro {
-  border-left: 6px solid var(--cor-erro);
+  border-left: 10px solid var(--erro);
   background: var(--cor-erro-bg);
   
 }

@@ -12,20 +12,13 @@ import {
 import {
   verificarAdmin
 } from "../middlewares/roleMiddleware.js";
-import {verifyPlan,
+import {
   checkPlanLimits
 } from "../middlewares/verifyPlan.js";
 
 const router = express.Router();
 
-router.post(
-  "/operador",
-  verificarToken,
-  verificarEmpresa,
-  verificarAdmin,
-  verifyPlan,
-  checkPlanLimits("operador"),
-  criarOperador
-);
+// proteção global já garantida em outro nível (se estiveres a usar router.use)
+router.post("/operador", verificarToken, verificarEmpresa, verificarAdmin, checkPlanLimits("operador"), criarOperador);
 
 export default router;

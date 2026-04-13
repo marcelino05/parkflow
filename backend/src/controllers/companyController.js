@@ -47,6 +47,7 @@ export const criarEmpresa = async (req, res) => {
     }
 
     const telefoneRegex = /^(82|83|84|85|86|87)[0-9]{7}$/;
+
     if (!telefoneRegex.test(telefoneLimpo)) {
       return res.status(400).json({
         success: false,
@@ -89,8 +90,7 @@ export const criarEmpresa = async (req, res) => {
       plano: "trial",
       status: "ativo",
       trialInicio: hoje,
-      trialFim: fimTrial,
-      limites: planLimits.trial
+      trialFim: fimTrial
     });
 
     usuario.empresaId = empresa._id;
@@ -125,7 +125,7 @@ export const buscarEmpresa = async (req, res) => {
     }
 
     const empresa = await Company.findById(usuario.empresaId)
-  .populate("proprietarioId", "nome");
+    .populate("proprietarioId", "nome");
 
     if (!empresa) {
       return res.status(404).json({
@@ -206,7 +206,10 @@ export const atualizarEmpresa = async (req, res) => {
       });
     }
 
-    res.json(empresa);
+    res.json({
+      success: true,
+      empresa
+    });
 
   } catch (erro) {
     console.error(erro);
@@ -226,49 +229,66 @@ export const statusEmpresa = async (req, res) => {
     const empresa = await Company.findById(req.empresaId)
 
     const agora = new Date()
-    let diasRestantes = 0
-    let status = "ativo";
 
-    if (empresa.trialFim) {
-      diasRestantes = Math.max(
-        0,
-        Math.ceil((empresa.trialFim - agora) / (1000 * 60 * 60 * 24))
-      )
+    let diasRestantes = 0
+    let status = empresa.status
+
+    let inicioPlano = null
+    let fimPlano = null
+
+    // TRIAL
+    if (empresa.plano === "trial") {
+
+      inicioPlano = empresa.trialInicio
+      fimPlano = empresa.trialFim
+
+      if (empresa.trialFim) {
+        diasRestantes = Math.max(
+          0,
+          Math.ceil((new Date(empresa.trialFim) - agora) / (1000 * 60 * 60 * 24))
+        )
+      }
+
+      if (diasRestantes === 0) status = "suspenso"
     }
 
-    if (empresa.plano === "trial") {
-      diasRestantes = Math.max(
-        0,
-        Math.ceil((empresa.trialFim - agora) / (1000 * 60 * 60 * 24))
-      );
+    // PLANO PAGO
+    if (empresa.plano !== "trial") {
 
-      if (diasRestantes === 0) status = "expirado";
+      inicioPlano = empresa.dataInicioPlano || null
+      fimPlano = empresa.dataExpiracaoPlano
 
-    } else {
       if (empresa.dataExpiracaoPlano) {
         diasRestantes = Math.max(
           0,
-          Math.ceil((empresa.dataExpiracaoPlano - agora) / (1000 * 60 * 60 * 24))
-        );
-
-        if (diasRestantes === 0) status = "expirado";
+          Math.ceil((new Date(empresa.dataExpiracaoPlano) - agora) / (1000 * 60 * 60 * 24))
+        )
       }
+
+      if (diasRestantes === 0) status = "suspenso"
     }
+
+    const limites = planLimits[empresa.plano] || planLimits.trial
 
     res.json({
       success: true,
       plano: empresa.plano,
       status,
       diasRestantes,
-      limites: empresa.limites
-    });
+      inicioPlano,
+      fimPlano,
+      limites
+    })
 
   } catch (erro) {
     res.status(500).json({
-      success: false, message: erro.message
-    });
+      success: false,
+      message: erro.message
+    })
   }
 }
+
+
 
 export const usoEmpresa = async (req, res) => {
   try {

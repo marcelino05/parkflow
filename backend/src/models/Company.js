@@ -26,10 +26,10 @@ const empresaSchema = new mongoose.Schema({
 
     plano: {
       type: String,
-      enum: ["trial", "basico", "pro"],
+      enum: ["trial", "basico", "pro", "premium"],
     default: "trial"
     },
-
+    
     status: {
       type: String,
       enum: ["ativo", "suspenso"],
@@ -43,7 +43,7 @@ const empresaSchema = new mongoose.Schema({
       type: Boolean,
     default: true
     },
-
+dataInicioPlano: Date,
     dataExpiracaoPlano: Date,
 
     limites: {

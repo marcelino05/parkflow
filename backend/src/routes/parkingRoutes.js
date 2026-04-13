@@ -22,17 +22,16 @@ import {
 
 const router = express.Router();
 
-// 🔐 base de proteção
+// proteção global
 router.use(verificarToken, verificarEmpresa, verifyPlan);
 
-// 🚗 CRIAR (com limite)
-router.post("/", permitir("admin"), checkPlanLimits("parking"),
-  criarEstacionamento);
-
-// ✏️ UPDATE
+// criar estacionamento (com limite)
+router.post("/", permitir("admin"), checkPlanLimits("parking"), criarEstacionamento);
+// atualizar estacionamento
 router.put("/:id", permitir("admin"), atualizarEstacionamento);
-
-// 👁️ VER
+// ver estacionamento específico
 router.get("/:id", permitir("admin", "operador"), buscarEstacionamento);
+// listar estacionamentos
 router.get("/", permitir("admin", "operador"), listarEstacionamentos);
+
 export default router;
