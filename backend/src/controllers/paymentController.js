@@ -102,12 +102,22 @@ export const confirmarPagamento = async (req, res) => {
       });
     }
 
-    if (pagamento.status !== "pendente") {
+
+    if (!pagamento.status) {
+      return res.status(500).json({
+        success: false,
+        message: "Pagamento corrompido ou inválido"
+      })
+    }
+
+    const statusValido = pagamento?.status
+
+    if (statusValido !== "pendente") {
       return res.status(400).json({
         success: false,
         message: "Pagamento já processado"
       });
-    }
+    }//errro e esse aqui
 
     // 2. BUSCAR EMPRESA DEPOIS
     const empresa = await Company.findById(pagamento.empresaId);
@@ -147,6 +157,7 @@ export const confirmarPagamento = async (req, res) => {
     empresa.dataExpiracaoPlano = novaExpiracao;
 
     await empresa.save();
+    req.empresa = empresa
 
     return res.json({
       success: true,

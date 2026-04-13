@@ -66,7 +66,7 @@ export async function request(endpoint, method = "GET", body = null) {
     
     const data = await res.json().catch(() => null);
     
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401 ) {
       clearSession();
       window.location.href = "../auth/auth.html";
       return;

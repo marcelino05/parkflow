@@ -275,7 +275,7 @@ export const statusEmpresa = async (req, res) => {
       plano: empresa.plano,
       status,
       diasRestantes,
-      inicioPlano,
+      inicioPlano: Date.now(),
       fimPlano,
       limites
     })

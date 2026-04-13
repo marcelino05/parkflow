@@ -182,6 +182,23 @@ b {
 
 .card.active .icon {
   background: var(--cor-sucesso);
+  
+  
+}
+
+.card.active  {
+  border-left:6px solid var(--cor-sucesso);
+  
+}
+
+.card.available{
+  border-left:6px solid var(--cor-primaria);
+
+}
+
+.card.entry  {
+  border-left:6px solid var(--cor-alerta);
+
 }
 
 .card.entry .icon {
@@ -383,117 +400,138 @@ b {
   }
 }
 
-
-.session-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
-  padding: 12px;
-  margin-bottom: 10px;
-  
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--sombra);
-}
-
-.session-card strong {
-  font-size: 16px;
-}
-
-.session-card p {
-  font-size: 12px;
-  color: var(--sub);
-}
-
-.exit-btn {
-  background: var(--cor-erro);
-  color: white;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
+/* =========================
+   LISTA DOS CARDS (IMPORTANTE)
+========================= */
 .card-item {
   background: var(--card);
   color: var(--texto);
+  
   border-radius: var(--radius);
   border: 1px solid var(--borda);
   box-shadow: var(--sombra);
+  
   padding: 15px;
+  
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: 0.2s ease;
+  gap: 12px;
+  
   position: relative;
+  
+  width: 100%;
+  
+  transition: all 0.25s ease;
 }
 
+/* HOVER MODERNO */
 .card-item:hover {
-  border: 1px solid var(--cor-alerta);
+  transform: translateY(-4px);
+  border-color: var(--cor-primaria);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* STATUS */
+/* HEADER DO CARD */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header strong {
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+/* STATUS MAIS BONITO */
 .status {
   padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: bold;
-  position: absolute;
-  right: 15px;
+  text-transform: uppercase;
+  color: #fff;
 }
 
-/* usa TUAS cores */
 .status.ativo {
   background: var(--cor-sucesso);
-  color: #fff;
 }
 
 .status.finalizado {
   background: var(--cor-erro);
-  color: #fff;
 }
 
-/* BODY */
+/* BODY DO CARD */
+.card-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.card-body div {
+  flex: 1;
+}
+
 .card-body small {
   color: var(--sub);
-  font-size: .85em;
+  font-size: 0.75em;
 }
 
 .card-body p {
-  margin: 2px 0 0;
-  font-weight: 500;
-  color: var(--cor-sucesso);
+  margin: 3px 0 0;
+  font-weight: 600;
+  color: var(--texto);
 }
 
 /* FOOTER */
 .card-footer {
+  font-size: 12px;
   color: var(--sub);
-  margin-bottom: 10px;
+  border-top: 1px solid var(--borda);
+  padding-top: 8px;
 }
 
-.card-footer .placa{
-  color: var(--texto);
-}
-/* BOTÃO */
+/* BOTÃO MAIS MODERNO */
 .exit-btn {
-  border: none;
   background: var(--cor-erro);
   color: #fff;
+  
+  border: none;
   padding: 10px;
+  
   border-radius: var(--radius);
   cursor: pointer;
-  transition: 0.2s;
+  
   font-weight: bold;
+  transition: 0.2s;
 }
 
 .exit-btn:hover {
-  opacity: .90;
+  opacity: 0.9;
+  transform: scale(1.02);
 }
 
-/* EMPTY */
-.empty {
-  text-align: center;
-  padding: 30px;
-  color: var(--sub);
+#listSessions {
+  display: grid !important;
+  gap: 10px !important;
+  
+  grid-template-columns: 1fr !important;
+}
+
+/* tablet */
+@media (min-width: 768px) {
+  #listSessions {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .cards .card{
+    margin-top: 20px;
+  }
+}
+
+/* desktop */
+@media (min-width: 1024px) {
+  #listSessions {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  }
 }

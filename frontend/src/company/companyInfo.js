@@ -180,6 +180,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         companyDiasRestantes.classList.add("alerta-laranja");
       }
       
+      console.log(planoEmpresa)
+      
       companyPlanoInicio.textContent = formatarData(planoEmpresa.inicioPlano);
       companyPlanoFim.textContent = formatarData(planoEmpresa?.fimPlano);
 
@@ -197,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       atualizarBarra(
         barParking,
         textParking,
-        uso?.estacionamentos?.limite || 0,
+        planoEmpresa?.limites?.maxEstacionamentos || 0,
         uso?.estacionamentos?.usado || 0
       );
       
@@ -206,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       atualizarBarra(
         barOperators,
         textOperators,
-        uso?.operadores?.limite || 0,
+        planoEmpresa?.limites.maxOperadores || 0,
         uso?.operadores?.usado || 0
       );
       
@@ -215,7 +217,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       atualizarBarra(
         barSpots,
         textSpots,
-        uso?.vagas?.limite || 0,
+        planoEmpresa?.limites?.maxVagas|| 0,
         uso?.vagas?.usado || 0
       );
       

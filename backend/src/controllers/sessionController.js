@@ -238,11 +238,32 @@ export const listarHistorico = async(req, res)=> {
 //*****************************************
 export const listarCarrosAtivos = async (req, res) => {
   try {
-    const ativos = await ParkingSession.find({
+    const {
+      placa,
+      estacionamentoId
+    } = req.query;
+
+    //  filtro dinâmico
+    const filtro = {
       empresaId: req.empresaId,
       status: "ativo"
-    })
-    .populate("estacionamentoId", "nome endereco") // opcional otimizar
+    };
+
+    //  filtro por placa (LIKE)
+    if (placa) {
+      filtro.placa = {
+        $regex: placa,
+        $options: "i"
+      }; // case insensitive
+    }
+
+    //  filtro por estacionamento
+    if (estacionamentoId) {
+      filtro.estacionamentoId = estacionamentoId;
+    }
+
+    const ativos = await ParkingSession.find(filtro)
+    .populate("estacionamentoId", "nome endereco")
     .sort({
       criadoEm: -1
     });
