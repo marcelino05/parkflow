@@ -8,6 +8,12 @@ const pagamentoSchema = new mongoose.Schema({
     required: true
   },
 
+  plano: {
+    type: String,
+    enum: ["trial", "basico", "pro", "premium"],
+    required: true
+  },
+
   valor: {
     type: Number,
     required: true
@@ -20,7 +26,7 @@ const pagamentoSchema = new mongoose.Schema({
   },
 
   comprovante: {
-    type: String // ex: número da transação
+    type: String
   },
 
   status: {

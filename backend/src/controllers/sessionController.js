@@ -126,13 +126,13 @@ export const registrarSaida = async (req, res) => {
       });
     }
 
-    // 🔒 filtro seguro
+    //  filtro seguro
     let filtro = {
       _id: sessaoId,
       empresaId: req.empresaId
     };
 
-    // 👷 operador só mexe no seu estacionamento
+    // operador só mexe no seu estacionamento
     if (req.usuario.role === "operador") {
       filtro.estacionamentoId = req.usuario.estacionamentoId;
     }

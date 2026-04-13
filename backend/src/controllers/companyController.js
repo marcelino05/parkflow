@@ -307,7 +307,8 @@ export const usoEmpresa = async (req, res) => {
     });
 
     const totalOperadores = await User.countDocuments({
-      empresaId: req.empresaId
+      empresaId: req.empresaId,
+      role: "operador"
     });
 
     const totalVagas = await Parking.aggregate([{

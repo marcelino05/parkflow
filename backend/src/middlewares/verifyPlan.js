@@ -1,7 +1,7 @@
-import Company from "../models/Company.js";
-import Parking from "../models/Parking.js";
 import User from "../models/User.js";
 import planLimits from "../utils/planLimits.js";
+import Parking from "../models/Parking.js";
+import Company from "../models/Company.js";
 
 // =======================
 // VERIFICAR PLANO
@@ -74,26 +74,34 @@ export const verifyPlan = async (req, res, next) => {
 // =======================
 // LIMITES DO PLANO
 // =======================
+
 export const checkPlanLimits = (tipo) => {
   return async (req, res, next) => {
     try {
+
       const empresa = req.empresa;
-      const empresaId = empresa._id;
 
-      const limites = req.limites || planLimits[empresa.plano];
-
-      if (!limites) {
-        return res.status(400).json({
+      if (!empresa || !empresa._id) {
+        return res.status(404).json({
           success: false,
-          message: "Plano inválido"
+          message: "Empresa não encontrada no request"
         });
       }
+
+      const empresaId = empresa._id;
+
+      const limites = planLimits[empresa.plano] || planLimits.trial;
 
       let usado = 0;
       let max = 0;
 
+      // =========================
+      // ESTACIONAMENTOS
+      // =========================
       if (tipo === "parking") {
-        usado = await Parking.countDocuments({ empresaId });
+        usado = await Parking.countDocuments({
+          empresaId
+        });
         max = limites.maxEstacionamentos;
 
         if (usado >= max) {
@@ -106,6 +114,9 @@ export const checkPlanLimits = (tipo) => {
         }
       }
 
+      // =========================
+      // OPERADORES
+      // =========================
       if (tipo === "operador") {
         usado = await User.countDocuments({
           empresaId,
@@ -124,16 +135,23 @@ export const checkPlanLimits = (tipo) => {
         }
       }
 
+      // =========================
+      // VAGAS
+      // =========================
       if (tipo === "vagas") {
-        const result = await Parking.aggregate([
-          { $match: { empresaId } },
+        const result = await Parking.aggregate([{
+          $match: {
+            empresaId
+          }
+        },
           {
             $group: {
               _id: null,
-              total: { $sum: "$totalVaga" }
+              total: {
+                $sum: "$totalVaga"
+              }
             }
-          }
-        ]);
+          }]);
 
         usado = result[0]?.total || 0;
         max = limites.maxVagas;

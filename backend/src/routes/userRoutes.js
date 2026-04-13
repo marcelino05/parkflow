@@ -18,7 +18,6 @@ import {
 
 const router = express.Router();
 
-// proteção global já garantida em outro nível (se estiveres a usar router.use)
 router.post("/operador", verificarToken, verificarEmpresa, verificarAdmin, checkPlanLimits("operador"), criarOperador);
 
 export default router;

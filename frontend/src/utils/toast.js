@@ -99,42 +99,43 @@ export const clearToast = () => {
     toastInstance = null;
   }
 };
+
 export function confirmarToast(mensagem) {
   return new Promise((resolve) => {
-    const toast = createToast(mensagem, "info");
     
-    const container = document.createElement("div");
-    container.classList.add("toast-actions");
+    const toast = document.createElement("div");
+    toast.classList.add("toast", "confirm");
+    
+    const texto = document.createElement("p");
+    texto.textContent = mensagem;
+    
+    const actions = document.createElement("div");
+    actions.classList.add("toast-actions");
     
     const btnConfirmar = document.createElement("button");
-    btnConfirmar.textContent = "Confirmar";
     btnConfirmar.classList.add("btn-confirm");
+    btnConfirmar.textContent = "Confirmar";
     
     const btnCancelar = document.createElement("button");
-    btnCancelar.textContent = "Cancelar";
     btnCancelar.classList.add("btn-cancel");
+    btnCancelar.textContent = "Cancelar";
     
-    container.appendChild(btnConfirmar);
-    container.appendChild(btnCancelar);
+    actions.appendChild(btnConfirmar);
+    actions.appendChild(btnCancelar);
     
-    toast.appendChild(container);
+    toast.appendChild(texto);
+    toast.appendChild(actions);
     
-    // NÃO auto-remove aqui, controle manual
-    updateToast(toast, mensagem, "info", 0);
+    // IMPORTANTE: NÃO usa container de toast normal
+    document.body.appendChild(toast);
     
     btnConfirmar.onclick = () => {
-      updateToast(toast, "Confirmado", "sucesso");
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
+      toast.remove();
       resolve(true);
     };
     
     btnCancelar.onclick = () => {
-      updateToast(toast, "Cancelado", "erro");
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
+      toast.remove();
       resolve(false);
     };
   });

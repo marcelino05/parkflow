@@ -16,11 +16,10 @@ import {
 
 const router = express.Router();
 
+// CLIENTE (ADMIN DA EMPRESA) CRIA PEDIDO
+router.post("/pedido", verificarToken, verificarEmpresa, permitir("admin"), criarPedidoPagamento);
 
-
-// cliente envia (admin)
-router.post("/pedido", verificarToken,  permitir("admin"), criarPedidoPagamento);
-
-// só admin pode confirmar
+//  CONFIRMAÇÃO (MVP CONTROLADO POR TI)
 router.post("/confirmar", verificarToken, permitir("admin"), confirmarPagamento);
+
 export default router;

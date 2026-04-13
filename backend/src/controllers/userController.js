@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs";
-import planLimits from "../utils/planLimits.js";
 import User from "../models/User.js";
 import Company from "../models/Company.js";
 import Parking from "../models/Parking.js";
 
 export const criarOperador = async (req, res) => {
   try {
+
     const {
       nome,
       telefone,
@@ -13,18 +13,27 @@ export const criarOperador = async (req, res) => {
       senha,
       estacionamentoId
     } = req.body;
-    
-    if (!nome || !telefone || !email || !senha) {
+
+
+    if (!req.usuarioId) {
+      return res.status(401).json({
+        success: false,
+        message: "Token inválido"
+      });
+    }
+
+    if (!nome || !telefone || !email || !senha || !estacionamentoId) {
       return res.status(400).json({
         success: false,
         message: "Todos os campos são obrigatórios."
       });
     }
 
-    const emailExiste = await User.findOne({
+    const usuarioExistente = await User.findOne({
       email
     });
-    if (emailExiste) {
+
+    if (usuarioExistente) {
       return res.status(400).json({
         success: false,
         message: "Email já cadastrado."
@@ -34,7 +43,7 @@ export const criarOperador = async (req, res) => {
     const usuario = await User.findById(req.usuarioId);
 
     if (!usuario || !usuario.empresaId) {
-      return res.status(404).json({
+      return res.status(403).json({
         success: false,
         message: "Empresa não encontrada."
       });
@@ -43,39 +52,22 @@ export const criarOperador = async (req, res) => {
     const empresa = await Company.findById(usuario.empresaId);
 
     if (!empresa) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Empresa não encontrada."
-      })
-    }
-
-    // verificar limite
-    const totalOperadores = await User.countDocuments({
-      empresaId: empresa._id,
-      role: {
-        $in: ["operador"]
-      }
-    });
-
-    const limites = planLimits[empresa.plano] || planLimits.default;
-
-    if (totalOperadores >= limites.maxOperadores) {
-      return res.status(403).json({
-        success: false,
-        message: "Limite de operadores atingido."
       });
     }
 
     const estacionamentoValido = await Parking.findOne({
       _id: estacionamentoId,
       empresaId: empresa._id
-    })
+    });
 
     if (!estacionamentoValido) {
       return res.status(400).json({
         success: false,
         message: "Estacionamento inválido."
-      })
+      });
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
@@ -90,22 +82,21 @@ export const criarOperador = async (req, res) => {
       role: "operador"
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       operador: {
         _id: operador._id,
         nome: operador.nome,
         telefone: operador.telefone,
         email: operador.email,
-        empresaId: operador.empresaId,
         role: operador.role
       }
     });
 
   } catch (erro) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Erro ao criar operador: " + erro.message
+      message: erro.message
     });
   }
 };

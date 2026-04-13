@@ -1,11 +1,39 @@
 import Payment from "../models/Payment.js";
 import Company from "../models/Company.js";
+import planPrices from "../utils/planPrices.js";
 
 export const criarPedidoPagamento = async (req, res) => {
   try {
-    const { valor, metodo, comprovante } = req.body;
+    const {
+      plano,
+      valor,
+      metodo,
+      comprovante
+    } = req.body;
 
-    // 🔍 buscar empresa
+    if (!req.usuarioId) {
+      return res.status(401).json({
+        success: false,
+        message: "Não autenticado"
+      });
+    }
+
+    // validar plano
+    if (!plano || !planPrices[plano]) {
+      return res.status(400).json({
+        success: false,
+        message: "Plano inválido"
+      });
+    }
+
+    // validar valor correto
+    if (valor !== planPrices[plano]) {
+      return res.status(400).json({
+        success: false,
+        message: "Valor não corresponde ao plano"
+      });
+    }
+
     const empresa = await Company.findOne({
       proprietarioId: req.usuarioId
     });
@@ -17,22 +45,6 @@ export const criarPedidoPagamento = async (req, res) => {
       });
     }
 
-    // validações
-    if (!valor || valor <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Valor inválido"
-      });
-    }
-
-    if (!metodo) {
-      return res.status(400).json({
-        success: false,
-        message: "Método obrigatório"
-      });
-    }
-
-    // 🔒 evitar duplicado
     const pagamentoExistente = await Payment.findOne({
       empresaId: empresa._id,
       status: "pendente"
@@ -45,24 +57,23 @@ export const criarPedidoPagamento = async (req, res) => {
       });
     }
 
-    // criar pagamento
     const pagamento = await Payment.create({
       empresaId: empresa._id,
+      plano,
       valor,
       metodo,
-      comprovante,
-      status: "pendente"
+      comprovante
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       pagamento
     });
 
   } catch (erro) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Erro ao criar pagamento: " + erro.message
+      message: erro.message
     });
   }
 };
@@ -70,7 +81,9 @@ export const criarPedidoPagamento = async (req, res) => {
 
 export const confirmarPagamento = async (req, res) => {
   try {
-    const { pagamentoId } = req.body;
+    const {
+      pagamentoId
+    } = req.body;
 
     if (!pagamentoId) {
       return res.status(400).json({
@@ -79,6 +92,7 @@ export const confirmarPagamento = async (req, res) => {
       });
     }
 
+    // 1. BUSCAR PAGAMENTO PRIMEIRO
     const pagamento = await Payment.findById(pagamentoId);
 
     if (!pagamento) {
@@ -88,46 +102,63 @@ export const confirmarPagamento = async (req, res) => {
       });
     }
 
-    if (pagamento.status === "confirmado") {
+    if (pagamento.status !== "pendente") {
       return res.status(400).json({
         success: false,
-        message: "Pagamento já confirmado"
+        message: "Pagamento já processado"
       });
     }
 
-    // confirmar pagamento
+    // 2. BUSCAR EMPRESA DEPOIS
+    const empresa = await Company.findById(pagamento.empresaId);
+
+    if (!empresa) {
+      return res.status(404).json({
+        success: false,
+        message: "Empresa não encontrada"
+      });
+    }
+
+    // 3. PERMISSÃO
+    if (empresa.proprietarioId.toString() !== req.usuarioId) {
+      return res.status(403).json({
+        success: false,
+        message: "Sem permissão para confirmar este pagamento"
+      });
+    }
+
+    //  4. CONFIRMAR PAGAMENTO
     pagamento.status = "confirmado";
     await pagamento.save();
 
-    const empresa = await Company.findById(pagamento.empresaId);
-
+    // 5. CALCULAR NOVA DATA
     const hoje = new Date();
 
-    // 🔥 lógica SaaS correta
     const base =
-      empresa.dataExpiracaoPlano &&
-      empresa.dataExpiracaoPlano > hoje
-        ? empresa.dataExpiracaoPlano
-        : hoje;
+    empresa.dataExpiracaoPlano && empresa.dataExpiracaoPlano > hoje
+    ? new Date(empresa.dataExpiracaoPlano): hoje;
 
     const novaExpiracao = new Date(base);
     novaExpiracao.setDate(base.getDate() + 30);
 
-    empresa.plano = "basico";
+    //  6. ATUALIZAR EMPRESA
+    empresa.plano = pagamento.plano;
     empresa.status = "ativo";
     empresa.dataExpiracaoPlano = novaExpiracao;
 
     await empresa.save();
 
-    res.json({
+    return res.json({
       success: true,
-      message: "Pagamento confirmado e plano ativado"
+      message: "Pagamento confirmado e plano ativado",
+      plano: empresa.plano,
+      expiraEm: empresa.dataExpiracaoPlano
     });
 
   } catch (erro) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Erro ao confirmar pagamento: " + erro.message
+      message: erro.message
     });
   }
 };

@@ -1,30 +1,39 @@
-import Company from "../models/Company.js"
-import User from "../models/User.js"
+import User from "../models/User.js";
+import Company from "../models/Company.js";
 
 export const verificarEmpresa = async (req, res, next) => {
-
   try {
 
-    const usuario = await User.findById(req.usuarioId)
+    if (!req.usuarioId) {
+      return res.status(401).json({
+        success: false,
+        message: "Token inválido ou não enviado"
+      });
+    }
+
+    const usuario = await User.findById(req.usuarioId);
 
     if (!usuario) {
       return res.status(404).json({
+        success: false,
         message: "Usuário não encontrado"
-      })
+      });
     }
 
     if (!usuario.empresaId) {
       return res.status(403).json({
+        success: false,
         message: "Empresa não criada"
-      })
+      });
     }
 
-    const empresa = await Company.findById(usuario.empresaId)
+    const empresa = await Company.findById(usuario.empresaId);
 
     if (!empresa) {
       return res.status(404).json({
+        success: false,
         message: "Empresa não encontrada"
-      })
+      });
     }
 
     if (empresa.status === "suspenso") {
@@ -66,11 +75,17 @@ export const verificarEmpresa = async (req, res, next) => {
       });
     }
 
-    req.empresaId = empresa._id
+    // 🔥 FIX PRINCIPAL (OBRIGATÓRIO)
+    req.usuario = usuario;
+    req.empresa = empresa;
+    req.empresaId = empresa._id;
 
-    next()
+    next();
 
   } catch (erro) {
-    next(erro)
+    return res.status(500).json({
+      success: false,
+      message: erro.message
+    });
   }
-}
+};

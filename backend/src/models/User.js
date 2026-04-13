@@ -28,10 +28,10 @@ const usuarioSchema = new mongoose.Schema({
   },
 
   role: {
-    type: String,
-    enum: ["admin", "operador"],
-    default: "operador"
-    },
+  type: String,
+  enum: ["admin", "operador"],
+  default: "operador"
+},
 
     empresaId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -39,11 +39,11 @@ const usuarioSchema = new mongoose.Schema({
     default: null
     },
 
-  estacionamentoId: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Parking",
-  default: null
-},
+    estacionamentoId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Parking",
+    default: null
+    },
     resetPasswordToken: String,
 
     resetPasswordExpire: Date,

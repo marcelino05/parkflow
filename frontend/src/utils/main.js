@@ -10,7 +10,8 @@ export function setSession(token, user) {
 
 export function getSession() {
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   
   return { token, user };
 }
@@ -63,24 +64,18 @@ export async function request(endpoint, method = "GET", body = null) {
       body: body ? JSON.stringify(body) : null
     });
     
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
     
-    /* =========================
-       AUTO LOGOUT (TOKEN INVÁLIDO)
-    ========================= */
-    if (res.status === 401) {
+    if (res.status === 401 || res.status === 403) {
       clearSession();
       window.location.href = "../auth/auth.html";
       return;
     }
     
-    /* =========================
-       ERRO PADRÃO
-    ========================= */
-    if (!res.ok || data.success === false) {
+    if (!res.ok || !data || data.success === false) {
       return {
         success: false,
-        message: data.message || "Erro na requisição",
+        message: data?.message || "Erro na requisição",
         data: null
       };
     }

@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       const empresa = dadosEmpresa?.empresa;
-      
+
       if (!empresa) {
         throw new Error("Empresa não encontrada");
       }
@@ -180,9 +180,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         companyDiasRestantes.classList.add("alerta-laranja");
       }
       
-      companyPlanoInicio.textContent = formatarData(empresa.criadoEm);
-      companyPlanoFim.textContent = formatarData(empresa.dataExpiracaoPlano);
-      
+      companyPlanoInicio.textContent = formatarData(planoEmpresa.inicioPlano);
+      companyPlanoFim.textContent = formatarData(planoEmpresa?.fimPlano);
+
       function atualizarBarra(barra, texto, total, usados) {
         const percent = total === 0 ? 0 : (usados / total) * 100;
         
