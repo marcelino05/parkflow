@@ -605,160 +605,369 @@ export const entradasPorHora = async (req, res) => {
 FILTRO BASE
 ========================= */
 const montarFiltroHistorico = (req, query) => {
-let filtro = {
-  status: "finalizado",
-  empresaId: req.empresaId
-};
-
-// ROLE
-if (req.usuario.role === "operador") {
-  filtro.estacionamentoId = req.usuario.estacionamentoId;
-}
-
-if (req.usuario.role === "admin" && query.estacionamentoId) {
-  filtro.estacionamentoId = query.estacionamentoId;
-}
-
-// PERIODO
-const agora = new Date();
-
-if (query.periodo === "hoje") {
-  const inicio = new Date();
-  inicio.setHours(0, 0, 0, 0);
-  filtro.horaSaida = {
-    $gte: inicio
+  let filtro = {
+    status: "finalizado",
+    empresaId: req.empresaId
   };
-}
 
-if (query.periodo === "semana") {
-  const inicio = new Date();
-  inicio.setDate(agora.getDate() - 7);
-  filtro.horaSaida = {
-    $gte: inicio
-  };
-}
+  // ROLE
+  if (req.usuario.role === "operador") {
+    filtro.estacionamentoId = req.usuario.estacionamentoId;
+  }
 
-if (query.periodo === "mes") {
-  const inicio = new Date();
-  inicio.setMonth(agora.getMonth() - 1);
-  filtro.horaSaida = {
-    $gte: inicio
-  };
-}
+  if (req.usuario.role === "admin" && query.estacionamentoId) {
+    filtro.estacionamentoId = query.estacionamentoId;
+  }
 
-return filtro;
+  // PERIODO
+  const agora = new Date();
+
+  if (query.periodo === "hoje") {
+    const inicio = new Date();
+    inicio.setHours(0, 0, 0, 0);
+    filtro.horaSaida = {
+      $gte: inicio
+    };
+  }
+
+  if (query.periodo === "semana") {
+    const inicio = new Date();
+    inicio.setDate(agora.getDate() - 7);
+    filtro.horaSaida = {
+      $gte: inicio
+    };
+  }
+
+  if (query.periodo === "mes") {
+    const inicio = new Date();
+    inicio.setMonth(agora.getMonth() - 1);
+    filtro.horaSaida = {
+      $gte: inicio
+    };
+  }
+
+  return filtro;
 };
 
 /* =========================
    LISTAR HISTÓRICO
 ========================= */
 export const listarHistorico = async (req, res) => {
-try {
-const pagina = Number(req.query.pagina) || 1;
-const limite = 20;
-const skip = (pagina - 1) * limite;
+  try {
+    const pagina = Number(req.query.pagina) || 1;
+    const limite = 20;
+    const skip = (pagina - 1) * limite;
 
-const filtro = montarFiltroHistorico(req, req.query);
+    const filtro = montarFiltroHistorico(req, req.query);
 
-const sessoes = await ParkingSession.find(filtro)
-.sort({
-horaSaida: -1
-})
-.skip(skip)
-.limit(limite)
-.populate("estacionamentoId", "nome")
-.populate("operadorId", "nome");
+    const sessoes = await ParkingSession.find(filtro)
+    .sort({
+      horaSaida: -1
+    })
+    .skip(skip)
+    .limit(limite)
+    .populate("estacionamentoId", "nome")
+    .populate("operadorId", "nome");
 
-const totalAgg = await ParkingSession.aggregate([{
-$match: filtro
-},
-{
-$group: {
-_id: null,
-total: {
-$sum: "$valorCobrado"
-}
-}
-}]);
+    const totalAgg = await ParkingSession.aggregate([{
+      $match: filtro
+    },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: "$valorCobrado"
+          }
+        }
+      }]);
 
-const totalFaturado = totalAgg[0]?.total || 0;
+    const totalFaturado = totalAgg[0]?.total || 0;
 
-const total = await ParkingSession.countDocuments(filtro);
+    const total = await ParkingSession.countDocuments(filtro);
 
-res.json({
-success: true,
-pagina,
-total,
-totalPaginas: Math.ceil(total / limite),
-totalFaturado,
-dados: sessoes
-});
+    res.json({
+      success: true,
+      pagina,
+      total,
+      totalPaginas: Math.ceil(total / limite),
+      totalFaturado,
+      dados: sessoes
+    });
 
-} catch (erro) {
-res.status(500).json({
-success: false,
-message: "Erro ao buscar histórico: " + erro.message
-});
-}
+  } catch (erro) {
+    res.status(500).json({
+      success: false,
+      message: "Erro ao buscar histórico: " + erro.message
+    });
+  }
 };
 
 /* =========================
    EXPORT PDF
 ========================= */
 export const exportarHistoricoPDF = async (req, res) => {
-try {
-const filtro = montarFiltroHistorico(req, req.query);
+  try {
+    const filtro = montarFiltroHistorico(req, req.query);
 
-const sessoes = await ParkingSession.find(filtro)
-.sort({
-horaSaida: -1
-})
-.populate("estacionamentoId", "nome")
-.populate("operadorId", "nome");
+    const sessoes = await ParkingSession.find(filtro)
+    .sort({
+      horaSaida: -1
+    })
+    .populate("estacionamentoId", "nome")
+    .populate("operadorId", "nome");
 
-const doc = new PDFDocument();
+    const doc = new PDFDocument( {
+      margin: 40
+    });
 
-res.setHeader("Content-Type", "application/pdf");
-res.setHeader("Content-Disposition", "attachment; filename=historico.pdf");
+    // =========================
+    // NOME DO ARQUIVO LIMPO
+    // =========================
+    const agora = new Date();
 
-doc.pipe(res);
+    const data = agora.toLocaleDateString("pt-PT", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).replace(/\//g, "-");
 
-doc.fontSize(18).text("Histórico de Sessões", {
-align: "center"
-});
-doc.moveDown();
+    const hora = agora.toLocaleTimeString("pt-PT", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).replace(":", "-");
 
-let total = 0;
+    const nomeFicheiro = `parkflow-historico-${data}_${hora}.pdf`;
 
-sessoes.forEach((s, i) => {
-total += s.valorCobrado || 0;
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${nomeFicheiro}"`
+    );
+    res.setHeader(
+      "Access-Control-Expose-Headers",
+      "Content-Disposition"
+    );
 
-doc.fontSize(12).text(
-`${i + 1}. Placa: ${s.placa} | Valor: ${s.valorCobrado} MT`
-);
+    doc.pipe(res);
 
-doc.fontSize(10).text(
-`Entrada: ${new Date(s.horaEntrada).toLocaleString()} | Saída: ${new Date(s.horaSaida).toLocaleString()}`
-);
+    // =========================
+    // FORMATADORES
+    // =========================
+    const formatarData = (data) => {
+      if (!data) return "-";
 
-doc.fontSize(10).text(
-`Estacionamento: ${s.estacionamentoId?.nome || "N/A"} | Operador: ${s.operadorId?.nome || "N/A"}`
-);
+      return new Date(data).toLocaleDateString("pt-PT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    };
 
-doc.moveDown();
-});
+    const formatarHora = (data) => {
+      if (!data) return "-";
 
-doc.moveDown();
-doc.fontSize(14).text(`Total faturado: ${total} MT`, {
-align: "right"
-});
+      return new Date(data).toLocaleTimeString("pt-PT", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    };
 
-doc.end();
+    const formatarDataHora = (data) => {
+      return {
+        data: formatarData(data),
+        hora: formatarHora(data),
+      };
+    };
 
-} catch (erro) {
-res.status(500).json({
-success: false,
-message: "Erro ao exportar PDF: " + erro.message
-});
-}
+    // =========================
+    // HEADER DO DOCUMENTO
+    // =========================
+    doc.fontSize(20)
+    .font("Helvetica-Bold")
+    .text("ParkFlow - Histórico de Sessões", {
+      align: "center"
+    });
+
+    doc.moveDown();
+
+    doc.fontSize(10)
+    .font("Helvetica")
+    .text(`Data de geração: ${new Date().toLocaleString()}`);
+
+    doc.moveDown();
+
+    doc.moveTo(40, doc.y)
+    .lineTo(555, doc.y)
+    .stroke();
+
+    doc.moveDown();
+
+    // =========================
+    // TABELA CONFIG
+    // =========================
+    const startX = 40;
+    const tableWidth = 515;
+
+    const cols = [{
+      key: "placa",
+      label: "PLACA",
+      width: 70
+    },
+      {
+        key: "entrada",
+        label: "ENTRADA",
+        width: 120
+      },
+      {
+        key: "saida",
+        label: "SAÍDA",
+        width: 120
+      },
+      {
+        key: "valor",
+        label: "VALOR",
+        width: 80
+      },
+      {
+        key: "est",
+        label: "ESTACIONAMENTO",
+        width: 125
+      },
+    ];
+
+    const positions = [];
+    let x = startX;
+
+    cols.forEach((c) => {
+      positions.push({
+        ...c, x
+      });
+      x += c.width;
+    });
+
+    let y = doc.y;
+    const rowHeight = 34;
+
+    // =========================
+    // HEADER TABELA
+    // =========================
+    doc.fillColor("white");
+    doc.rect(startX, y, tableWidth, 24).fill("#1f4e79");
+
+    doc.fillColor("white")
+    .font("Helvetica-Bold")
+    .fontSize(10);
+
+    positions.forEach((c) => {
+      doc.text(c.label, c.x, y + 7, {
+        width: c.width,
+        align: "center",
+      });
+    });
+
+    y += 24;
+
+    doc.font("Helvetica").fillColor("black");
+
+    // =========================
+    // LINHAS
+    // =========================
+    let total = 0;
+
+    sessoes.forEach((s, i) => {
+      if (y > 730) {
+        doc.addPage();
+        y = 50;
+
+        // reprint header
+        doc.fillColor("white");
+        doc.rect(startX, y, tableWidth, 24).fill("#1f4e79");
+
+        doc.fillColor("white")
+        .font("Helvetica-Bold")
+        .fontSize(10);
+
+        positions.forEach((c) => {
+          doc.text(c.label, c.x, y + 7, {
+            width: c.width,
+            align: "center",
+          });
+        });
+
+        y += 24;
+
+        doc.font("Helvetica").fillColor("black");
+      }
+
+      total += Number(s.valorCobrado || 0);
+
+      const entrada = s.horaEntrada
+      ? `${formatarDataHora(s.horaEntrada).data}\n${formatarDataHora(s.horaEntrada).hora}`: "-";
+
+      const saida = s.horaSaida
+      ? `${formatarDataHora(s.horaSaida).data}\n${formatarDataHora(s.horaSaida).hora}`: "-";
+
+      const values = {
+        placa: s.placa || "-",
+        entrada,
+        saida,
+        valor: `${s.valorCobrado || 0} MT`,
+        est: s.estacionamentoId?.nome || "-",
+      };
+
+      // zebra
+      if (i % 2 === 0) {
+        doc.fillColor("#f5f7fb")
+        .rect(startX, y, tableWidth, rowHeight)
+        .fill();
+      }
+
+      doc.fillColor("black").fontSize(9);
+
+      positions.forEach((c) => {
+        doc.text(values[c.key], c.x, y + 5, {
+          width: c.width,
+          align: "center",
+          lineBreak: true,
+        });
+      });
+
+      doc.strokeColor("#e0e0e0")
+      .moveTo(startX, y + rowHeight)
+      .lineTo(startX + tableWidth, y + rowHeight)
+      .stroke();
+
+      y += rowHeight;
+    });
+
+    // =========================
+    // TOTAL FINAL
+    // =========================
+    doc.moveDown();
+
+    doc.strokeColor("#000")
+    .moveTo(40,
+      doc.y)
+    .lineTo(555,
+      doc.y)
+    .stroke();
+
+    doc.moveDown();
+
+    doc.fontSize(12)
+    .font("Helvetica-Bold")
+    .text(`Total faturado: ${total} MT`,
+      {
+        align: "right",
+      });
+
+    doc.end();
+  } catch (erro) {
+    res.status(500).json({
+      success: false,
+      message: "Erro ao exportar PDF: " + erro.message,
+    });
+  }
 };

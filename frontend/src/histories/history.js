@@ -117,56 +117,69 @@ selectEstacionamento?.addEventListener("change", (e) => {
 });
 
 btnFiltrar?.addEventListener("click", loadHistorico);
+import { API_BASE } from '../utils/main.js';
 
-if (btnExportar) {
-  btnExportar.addEventListener("click", async () => {
-    try {
-      const periodo = filtroEl?.value;
-      
-      const params = [];
-      
-      if (periodo && periodo !== "todos") {
-        params.push(`periodo=${periodo}`);
-      }
-      
-      if (estacionamentoAtual) {
-        params.push(`estacionamentoId=${estacionamentoAtual}`);
-      }
-      
-      let url = "/session/historico/pdf";
-      
-      if (params.length > 0) {
-        url += "?" + params.join("&");
-      }
-      
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (!res.ok) throw new Error("Erro ao gerar PDF");
-      
-      const blob = await res.blob();
-      
-      const fileURL = window.URL.createObjectURL(blob);
-      
-      const a = document.createElement("a");
-      a.href = fileURL;
-      a.download = "historico.pdf";
-      document.body.appendChild(a);
-      a.click();
-      
-      a.remove();
-      window.URL.revokeObjectURL(fileURL);
-      
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao baixar PDF");
+btnExportar?.addEventListener("click", async () => {
+  try {
+    const periodo = filtroEl?.value;
+    
+    const params = [];
+    
+    if (periodo && periodo !== "todos") {
+      params.push(`periodo=${periodo}`);
     }
-  });
-}
+    
+    if (estacionamentoAtual) {
+      params.push(`estacionamentoId=${estacionamentoAtual}`);
+    }
+    
+    let url = `${API_BASE}/session/historico/pdf`;
+    
+    if (params.length) {
+      url += "?" + params.join("&");
+    }
+    
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    if (!res.ok) {
+      throw new Error("Erro ao gerar PDF");
+    }
+    
+    const blob = await res.blob();
+    
+    // pegar nome do backend
+    const disposition = res.headers.get("Content-Disposition");
+    
+    let nome = "historico.pdf";
+    
+    if (disposition && disposition.includes("filename")) {
+      nome = disposition
+        .split("filename=")[1]
+        .replace(/"/g, "");
+    }
+    
+    // criar download
+    const urlBlob = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = urlBlob;
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    
+    a.remove();
+    URL.revokeObjectURL(urlBlob);
+    
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao abrir PDF");
+  }
+});
 
 /* =========================
    RENDER
