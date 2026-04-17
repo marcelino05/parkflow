@@ -519,7 +519,7 @@ b {
 }
 
 /* tablet */
-@media (min-width: 768px) {
+@media (min-width: 568px) {
   #listSessions {
     grid-template-columns: repeat(2, 1fr) !important;
   }

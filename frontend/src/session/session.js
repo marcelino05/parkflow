@@ -17,34 +17,59 @@ applyPermissions(user);
 ========================= */
 let estacionamentoAtual = null;
 
-const toast = createToast("Carregando dados...", "info");
-
 /* =========================
    CARREGAR ESTACIONAMENTOS
 ========================= */
-async function getParkigs() {
+async function getParkings() {
+  const toast = createToast("Carregando dados...", "info");
+
   try {
+    // OPERADOR
+    if (user.role === "operador") {
+      estacionamentoAtual = user.estacionamentoId;
+
+      await loadStats(estacionamentoAtual);
+      await loadAtivos(estacionamentoAtual);
+
+      updateToast(toast, "Dados carregados", "sucesso");
+      return;
+    }
+
+    // ADMIN
     const data = await request("/parking");
+
+    if (!data.success) {
+      throw new Error("Erro ao carregar estacionamentos");
+    }
+
     const park = data.estacionamentos || [];
-    
+
     const select = document.getElementById("estacionamentoSelect");
+
+    if (!select) return;
+
     select.innerHTML = "";
-    
+
+    if (park.length === 0) {
+      createToast("Nenhum estacionamento encontrado", "info");
+      return;
+    }
+
     park.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p._id;
       opt.textContent = p.nome;
       select.appendChild(opt);
     });
-    
-    if (park.length > 0) {
-      estacionamentoAtual = park[0]._id;
-      select.value = estacionamentoAtual;
-      
-      loadStats(estacionamentoAtual);
-      loadAtivos(estacionamentoAtual);
-    }
-    
+
+    estacionamentoAtual = park[0]._id;
+    select.value = estacionamentoAtual;
+
+    await loadStats(estacionamentoAtual);
+    await loadAtivos(estacionamentoAtual);
+
+    updateToast(toast, "Estacionamentos carregados", "sucesso");
+
   } catch (err) {
     updateToast(toast, err.message, "erro");
   }
@@ -53,30 +78,43 @@ async function getParkigs() {
 /* =========================
    CHANGE SELECT
 ========================= */
-document.getElementById("estacionamentoSelect")
-  ?.addEventListener("change", (e) => {
+const selectEl = document.getElementById("estacionamentoSelect");
+
+if (selectEl) {
+  selectEl.addEventListener("change", async (e) => {
     estacionamentoAtual = e.target.value;
-    loadStats(estacionamentoAtual);
-    loadAtivos(estacionamentoAtual);
+    await loadStats(estacionamentoAtual);
+    await loadAtivos(estacionamentoAtual);
   });
+}
 
 /* =========================
    STATS
 ========================= */
 async function loadStats(estacionamentoId = null) {
   try {
-    const url = estacionamentoId ?
-      `/session/vagas-disponiveis?estacionamentoId=${estacionamentoId}` :
-      `/session/vagas-disponiveis`;
-    
+    const url = estacionamentoId
+      ? `/session/vagas-disponiveis?estacionamentoId=${estacionamentoId}`
+      : `/session/vagas-disponiveis`;
+
     const data = await request(url);
-    
-    document.getElementById("active").textContent = data.carrosAtivos;
-    document.getElementById("entry").textContent = data.entradas;
-    document.getElementById("available").textContent = data.vagasDisponiveis;
-    
+
+    if (!data.success) {
+      throw new Error("Erro ao carregar dados");
+    }
+
+    const stats = data.dados || data;
+
+    const elActive = document.getElementById("active");
+    const elEntry = document.getElementById("entry");
+    const elAvailable = document.getElementById("available");
+
+    if (elActive) elActive.textContent = stats.carrosAtivos;
+    if (elEntry) elEntry.textContent = stats.entradas;
+    if (elAvailable) elAvailable.textContent = stats.vagasDisponiveis;
+
   } catch (err) {
-    updateToast(toast, err.message, "erro");
+    createToast(err.message, "erro");
   }
 }
 
@@ -85,136 +123,172 @@ async function loadStats(estacionamentoId = null) {
 ========================= */
 function renderSessions(data) {
   const container = document.getElementById("listSessions");
+  if (!container) return;
+  
   container.innerHTML = "";
   
   if (!data.length) {
     container.innerHTML = `
       <div class="empty">
-        <i class="bi bi-inbox"></i>
         <p>Nenhuma movimentação ativa</p>
       </div>
     `;
     return;
   }
   
+  const fragment = document.createDocumentFragment();
+  
   data.forEach(sessao => {
-    container.innerHTML += `
-      <div class="card-item">
-
-        <div class="card-header">
-          <strong class="placa">${sessao.placa}</strong>
-          <span class="status ${sessao.status}">
-            ${sessao.status}
-          </span>
-        </div>
-
-        <div class="card-body">
-          <div>
-            <small>Entrada</small>
-            <p>${new Date(sessao.horaEntrada).toLocaleString()}</p>
-          </div>
-
-          <div>
-            <small>Valor</small>
-            <p>${sessao.valorCobrado ?? 0} MT</p>
-          </div>
-        </div>
-
-        <div class="card-footer">
-          <small>
-            ${sessao.estacionamentoId?.nome || "Não definido"}
-          </small>
-        </div>
-
-        <button class="exit-btn" data-id="${sessao._id}">
-          Confirmar saída
-        </button>
-
+    const div = document.createElement("div");
+    div.className = "card-item";
+    
+    div.innerHTML = `
+      <div class="card-header">
+        <strong class="placa">${formatarPlacaVisual(sessao.placa)}</strong>
+        <span class="status ${sessao.status}">
+          ${sessao.status}
+        </span>
       </div>
-    `;
-  });
-}
 
+      <div class="card-body">
+        <div>
+          <small>Entrada</small>
+          <p>${new Date(sessao.horaEntrada).toLocaleString()}</p>
+        </div>
+
+        <div>
+          <small>Valor a pagar</small>
+          <p>${sessao.valorCobrado ?? 0} MT</p>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <small>${sessao.estacionamentoId?.nome || "Não definido"}</small>
+      </div>
+
+      <button class="exit-btn" data-id="${sessao._id}">
+        Confirmar saída
+      </button>
+    `;
+    
+    fragment.appendChild(div);
+  });
+  
+  container.appendChild(fragment);
+}
 /* =========================
    SESSÕES ATIVAS
 ========================= */
 async function loadAtivos(estacionamentoId = null) {
   try {
-    const url = estacionamentoId ?
-      `/session/ativos?estacionamentoId=${estacionamentoId}` :
-      `/session/ativos`;
-    
+    const url = estacionamentoId
+      ? `/session/ativos?estacionamentoId=${estacionamentoId}`
+      : `/session/ativos`;
+
     const res = await request(url);
+
+    if (!res.success) {
+      throw new Error("Erro ao carregar sessões");
+    }
+
     renderSessions(res.data || []);
-    
+
   } catch (err) {
-    updateToast(toast, err.message, "erro");
+    createToast(err.message, "erro");
   }
 }
 
 /* =========================
    ENTRADA
 ========================= */
-document.getElementById("btnAction").onclick = async () => {
-  const placa = document.getElementById("placa").value.trim();
-  
-  if (!placa) {
-    updateToast(toast, "Digite a placa", "info");
-    return;
-  }
-  
-  if (user.role === "admin" && !estacionamentoAtual) {
-    updateToast(toast, "Escolha o estacionamento", "info");
-    return;
-  }
-  
-  try {
-    await request(`/session/entrada`, "POST", {
-      placa,
-      estacionamentoId: estacionamentoAtual
-    });
-    
-    document.getElementById("placa").value = "";
-    
-    loadStats(estacionamentoAtual);
-    loadAtivos(estacionamentoAtual);
-    
-    updateToast(toast, "Entrada registrada", "sucesso");
-    
-  } catch (err) {
-    updateToast(toast, err.message, "erro");
-  }
-};
+const btnEntrada = document.getElementById("btnAction");
+
+if (btnEntrada) {
+  btnEntrada.onclick = async () => {
+    const placaInput = document.getElementById("placa");
+
+    if (!placaInput) return;
+
+    const placa = placaInput.value
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+
+    if (!placa) {
+      createToast("Digite a placa", "info");
+      return;
+    }
+
+    if (user.role === "admin" && !estacionamentoAtual) {
+      createToast("Escolha o estacionamento", "info");
+      return;
+    }
+
+    const toast = createToast("Registrando entrada...", "info");
+
+    try {
+      btnEntrada.disabled = true;
+      btnEntrada.innerText = "Processando...";
+
+      const res = await request(`/session/entrada`, "POST", {
+        placa,
+        estacionamentoId: estacionamentoAtual
+      });
+
+      if (!res.success) {
+        throw new Error("Erro ao registrar entrada. Verifique a placa");
+      }
+
+      placaInput.value = "";
+
+      await loadStats(estacionamentoAtual);
+      await loadAtivos(estacionamentoAtual);
+
+      updateToast(toast, "Entrada registrada", "sucesso");
+
+    } catch (err) {
+      updateToast(toast, err.message, "erro");
+    } finally {
+      btnEntrada.disabled = false;
+      btnEntrada.innerText = "Registrar Entrada";
+    }
+  };
+}
 
 /* =========================
    SAÍDA
 ========================= */
-document.getElementById("listSessions").onclick = async (e) => {
-  if (!e.target.classList.contains("exit-btn")) return;
-  
-  const sessaoId = e.target.dataset.id;
-  
-  const card = e.target.closest(".card-item");
-  const placa = card.querySelector("strong")?.textContent || "";
-  
-  const confirmou = await confirmarToast(
-    `Deseja finalizar a sessão da placa ${placa}?`
-  );
-  
-  if (!confirmou) return;
-  
-  try {
-    await request(`/session/saida`, "POST", { sessaoId });
-    
-    loadStats(estacionamentoAtual);
-    loadAtivos(estacionamentoAtual);
-    
-    updateToast(toast, "Saída registrada", "sucesso");
-    
-  } catch (err) {
-    updateToast(toast, err.message, "erro");
-  }
-};
+const listEl = document.getElementById("listSessions");
+
+if (listEl) {
+  listEl.onclick = async (e) => {
+    if (!e.target.classList.contains("exit-btn")) return;
+
+    const sessaoId = e.target.dataset.id;
+
+    const confirmou = await confirmarToast("Confirmar saída?");
+
+    if (!confirmou) return;
+
+    const toast = createToast("Processando saída...", "info");
+
+    try {
+      const res = await request(`/session/saida`, "POST", { sessaoId });
+
+      if (!res.success) {
+        throw new Error("Erro ao finalizar sessão");
+      }
+
+      await loadStats(estacionamentoAtual);
+      await loadAtivos(estacionamentoAtual);
+
+      updateToast(toast, "Saída registrada", "sucesso");
+
+    } catch (err) {
+      updateToast(toast, err.message, "erro");
+    }
+  };
+}
 
 /* =========================
    PESQUISA
@@ -223,18 +297,14 @@ const searchInput = document.getElementById("searchPlaca");
 
 if (searchInput) {
   let timeout;
-  
+
   searchInput.addEventListener("input", (e) => {
     clearTimeout(timeout);
-    
+
     const termo = e.target.value.trim();
-    
+
     timeout = setTimeout(() => {
-      if (!termo) {
-        loadAtivos(estacionamentoAtual);
-        return;
-      }
-      
+      if (termo.length < 3) return;
       pesquisarPlaca(termo);
     }, 300);
   });
@@ -242,21 +312,37 @@ if (searchInput) {
 
 async function pesquisarPlaca(termo) {
   try {
-    const url = estacionamentoAtual ?
-      `/session/ativos?placa=${termo}&estacionamentoId=${estacionamentoAtual}` :
-      `/session/ativos?placa=${termo}`;
-    
+    const url = estacionamentoAtual
+      ? `/session/ativos?placa=${termo}&estacionamentoId=${estacionamentoAtual}`
+      : `/session/ativos?placa=${termo}`;
+
     const res = await request(url);
+
+    if (!res.success) {
+      throw new Error("Erro ao pesquisar");
+    }
+
     renderSessions(res.data || []);
-    
+
   } catch (err) {
-    console.error(err);
+    createToast(err.message, "erro");
   }
+}
+
+/* =========================
+   FORMATAR PLACA
+========================= */
+function formatarPlacaVisual(placa) {
+  if (!placa) return "";
+
+  const limpa = placa.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  if (limpa.length < 8) return placa;
+
+  return `${limpa.slice(0, 3)}-${limpa.slice(3, 6)}-${limpa.slice(6, 8)}`;
 }
 
 /* =========================
    INIT
 ========================= */
-getParkigs();
-loadStats();
-loadAtivos();
+getParkings();

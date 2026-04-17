@@ -1,12 +1,142 @@
 <!DOCTYPE html>
-<html lang="pt-Mz">
+<html lang="pt-MZ">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>parkflow historicos</title>
+  <title>ParkFlow - Histórico</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <link rel="stylesheet" href="../utils/global.css">
+  <link rel="stylesheet" href="../utils/toast.css">
+  <link rel="stylesheet" href="../session/session.css">
+  <link rel="stylesheet" href="./history.css">
 </head>
+
 <body>
-  
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-top">
+    <div class="logo">Park<b>Flow</b></div>
+    <i class="bi bi-x-lg close-icon" id="closeMenu"></i>
+  </div>
+
+  <nav>
+    <a href="../dashboard/dashboard.html" class="only-admin">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <a href="../session/sessao.html">
+      <i class="bi bi-car-front"></i> Sessões
+    </a>
+
+    <a href="../parking/parking.html">
+      <i class="bi bi-p-square"></i> Estacionamento
+    </a>
+
+    <a href="../operators/operator.html" class="only-admin">
+      <i class="bi bi-person"></i> Operadores
+    </a>
+
+    <a href="../company/companyInfo.html" class="only-admin">
+      <i class="bi bi-buildings"></i> Empresa
+    </a>
+
+    <a href="./history.html">
+      <i class="bi bi-clock-history"></i> Histórico
+    </a>
+
+    <a href="../settings/setting.html" class="only-admin">
+      <i class="bi bi-gear"></i> Configurações
+    </a>
+  </nav>
+
+</aside>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- HEADER -->
+  <header class="header">
+
+    <div class="left">
+      <span id="btn-menu">
+        <i class="bi bi-list"></i>
+      </span>
+      <h3>Histórico</h3>
+    </div>
+
+    <div class="right">
+      <div class="theme-box">
+        <i class="bi bi-moon" id="themeBtn"></i>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <h2>Histórico de Sessões</h2>
+
+    <!-- FILTROS -->
+    <div class="filters">
+
+      <!-- ADMIN SELECT (SEM display:none fixo) -->
+      <select id="estacionamentoSelect" class="input only-admin"></select>
+
+      <select id="filtroPeriodo" class="input">
+        <option value="hoje">Hoje</option>
+        <option value="semana">Últimos 7 dias</option>
+        <option value="mes">Último mês</option>
+        <option value="todos">Todos</option>
+      </select>
+
+      <button id="btnFiltrar" class="btn">Filtrar</button>
+      <button id="btnExportarPDF" class="btn btn-secondary">PDF</button>
+
+    </div>
+
+    <!-- RESUMO -->
+    <div class="history-summary">
+
+      <div class="summary-card">
+        <small>Total faturado</small>
+        <h3 id="totalFaturado">0 MT</h3>
+      </div>
+
+      <div class="summary-card">
+        <small>Total registos</small>
+        <h3 id="totalRegistos">0</h3>
+      </div>
+
+    </div>
+
+    <!-- LISTA -->
+    <div class="history-list" id="historyList"></div>
+
+    <!-- EMPTY -->
+    <div class="empty" id="emptyState">
+      <i class="bi bi-inbox"></i>
+      <p>Nenhum histórico disponível</p>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="../utils/global.js" defer></script>
+<script type="module" src="./history.js"></script>
+
+<script>
+  document.getElementById("closeMenu").addEventListener("click", () => {
+    document.querySelector(".sidebar").classList.remove("active");
+  });
+</script>
+
 </body>
 </html>

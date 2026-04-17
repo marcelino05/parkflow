@@ -1,6 +1,7 @@
 import { request, getSession, logOut } from "../utils/main.js";
 import { createToast, updateToast } from "../utils/toast.js";
 
+
 document.addEventListener("DOMContentLoaded", async () => {
   
   /* ==============================
@@ -180,7 +181,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         companyDiasRestantes.classList.add("alerta-laranja");
       }
       
-      console.log(planoEmpresa)
       
       companyPlanoInicio.textContent = formatarData(planoEmpresa.inicioPlano);
       companyPlanoFim.textContent = formatarData(planoEmpresa?.fimPlano);

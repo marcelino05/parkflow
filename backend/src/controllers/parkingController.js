@@ -1,19 +1,14 @@
-import Parking from "../models/Parking.js"
+import Parking from "../models/Parking.js";
 import mongoose from "mongoose";
 import planLimits from "../utils/planLimits.js";
 import ParkingSession from "../models/ParkingSession.js";
 
-//==========LinkWa_parkflow==================
-//criarEstacionamento POST /parking
-//===========================================
+/* =========================
+   CRIAR ESTACIONAMENTO
+========================= */
 export const criarEstacionamento = async (req, res) => {
   try {
-    const {
-      nome,
-      endereco,
-      totalVaga,
-      precoPorHora
-    } = req.body;
+    const { nome, endereco, totalVaga, precoPorHora } = req.body;
 
     if (!nome?.trim() || totalVaga === undefined || !endereco?.trim()) {
       return res.status(400).json({
@@ -102,15 +97,12 @@ export const criarEstacionamento = async (req, res) => {
   }
 };
 
-//==========LinkWa_parkflow==================
-//BuscarEstacionamento Get /parking
-//===========================================
-
+/* =========================
+   BUSCAR ESTACIONAMENTO
+========================= */
 export const buscarEstacionamento = async (req, res) => {
   try {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -143,50 +135,69 @@ export const buscarEstacionamento = async (req, res) => {
     });
   }
 };
-//==========LinkWa_parkflow==================
-//AtualizarEstacionamento put /parking
-//===========================================
+
+/* =========================
+   ATUALIZAR ESTACIONAMENTO
+========================= */
 export const atualizarEstacionamento = async (req, res) => {
   try {
-    const camposPermitidos = ['nome',
-      'endereco',
-      'totalVaga',
-      'precoPorHora'];
+    const camposPermitidos = ["nome", "endereco", "totalVaga", "precoPorHora"];
     const updateData = {};
 
     for (const c of camposPermitidos) {
       if (req.body[c] !== undefined) {
-        if (c === 'totalVaga' || c === 'precoPorHora') {
+        if (c === "totalVaga" || c === "precoPorHora") {
           const num = Number(req.body[c]);
-          if (isNaN(num)) {
+
+          if (isNaN(num) || num <= 0) {
             return res.status(400).json({
               success: false,
               message: `${c} deve ser um número válido`
             });
           }
+
           updateData[c] = num;
-        } else if (typeof req.body[c] === 'string') {
+        } else if (typeof req.body[c] === "string") {
           updateData[c] = req.body[c].trim();
         }
       }
     }
 
-    const estacionamento = await Parking.findOneAndUpdate(
-      {
-        _id: req.params.id, empresaId: req.empresaId
-      },
-      updateData,
-      {
-        new: true
-      } // elhor que returnDocument
-    );
+    const estacionamentoAtual = await Parking.findOne({
+      _id: req.params.id,
+      empresaId: req.empresaId
+    });
 
-    if (!estacionamento) {
+    if (!estacionamentoAtual) {
       return res.status(404).json({
         success: false,
         message: "Estacionamento não encontrado"
       });
     }
+
+    const empresa = req.empresa;
+    const limites = planLimits?.[empresa?.plano];
+
+    if (limites) {
+      const totalVagaFinal =
+        updateData.totalVaga ?? estacionamentoAtual.totalVaga;
+
+      if (totalVagaFinal > limites.maxVagas) {
+        return res.status(403).json({
+          success: false,
+          message: "Limite de vagas excedido no seu plano"
+        });
+      }
+    }
+
+    const estacionamento = await Parking.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        empresaId: req.empresaId
+      },
+      updateData,
+      { new: true }
+    );
 
     res.json({
       success: true,
@@ -201,18 +212,23 @@ export const atualizarEstacionamento = async (req, res) => {
   }
 };
 
-//==========LinkWa_parkflow==================
-//ListarEstacionamentos GET /parking
-//===========================================
+/* =========================
+   LISTAR ESTACIONAMENTOS (ADMIN/OPERADOR)
+========================= */
 export const listarEstacionamentos = async (req, res) => {
   try {
-    const estacionamentos = await Parking.find({
+    let filtro = {
       empresaId: req.empresaId
-    });
+    };
+
+    if (req.usuario.role === "operador") {
+      filtro._id = req.usuario.estacionamentoId;
+    }
+
+    const estacionamentos = await Parking.find(filtro);
 
     const resultado = await Promise.all(
       estacionamentos.map(async (p) => {
-
         const ocupadas = await ParkingSession.countDocuments({
           estacionamentoId: p._id,
           empresaId: req.empresaId,

@@ -1,3 +1,4 @@
+import PDFDocument from "pdfkit";
 import mongoose from "mongoose"
 import ParkingSession from "../models/ParkingSession.js"
 import Parking from "../models/Parking.js"
@@ -16,16 +17,12 @@ export const registrarEntrada = async (req, res) => {
 
     let estacionamentoId;
 
-    // operador → automático
     if (req.usuario.role === "operador") {
       estacionamentoId = req.usuario.estacionamentoId;
-    }
-    //  admin → escolhe
-    else {
+    } else {
       estacionamentoId = req.body.estacionamentoId;
     }
 
-    // validações
     if (!placa?.trim() || !estacionamentoId) {
       return res.status(400).json({
         success: false,
@@ -33,7 +30,18 @@ export const registrarEntrada = async (req, res) => {
       });
     }
 
-    // validar ObjectId
+    if (typeof placa !== "string" || placa.trim().length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Placa inválida"
+      });
+    }
+
+    const placaFormatada = placa
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
     if (!mongoose.Types.ObjectId.isValid(estacionamentoId)) {
       return res.status(400).json({
         success: false,
@@ -67,7 +75,7 @@ export const registrarEntrada = async (req, res) => {
     }
 
     const sessaoAtiva = await ParkingSession.findOne({
-      placa: placa.trim().toUpperCase(),
+      placa: placaFormatada,
       status: "ativo",
       empresaId: req.empresaId
     });
@@ -80,21 +88,20 @@ export const registrarEntrada = async (req, res) => {
     }
 
     const sessao = await ParkingSession.create({
-      placa: placa.trim().toUpperCase(),
+      placa: placaFormatada,
       estacionamentoId,
       empresaId: req.empresaId,
-      operadorId: req.usuarioId,
+      operadorId: req.usuario._id,
       horaEntrada: new Date(),
       status: "ativo"
     });
 
     res.status(201).json({
-      success: true,
-      sessao
+      success: true, sessao
     });
 
     await criarLog( {
-      usuarioId: req.usuarioId,
+      usuarioId: req.usuario._id,
       empresaId: req.empresaId,
       acao: "entrada_carro",
       entidade: "sessao",
@@ -108,6 +115,8 @@ export const registrarEntrada = async (req, res) => {
     });
   }
 };
+
+
 
 //*************LinkWa_parkflow*************
 // =>REGISTRAR SAIDA DE CARROS
@@ -126,13 +135,19 @@ export const registrarSaida = async (req, res) => {
       });
     }
 
-    //  filtro seguro
+    // ALIDAÇÃO IMPORTANTE
+    if (!mongoose.Types.ObjectId.isValid(sessaoId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID da sessão inválido"
+      });
+    }
+
     let filtro = {
       _id: sessaoId,
       empresaId: req.empresaId
     };
 
-    // operador só mexe no seu estacionamento
     if (req.usuario.role === "operador") {
       filtro.estacionamentoId = req.usuario.estacionamentoId;
     }
@@ -171,14 +186,17 @@ export const registrarSaida = async (req, res) => {
     const horas = Math.ceil(tempoMs / (1000 * 60 * 60));
     const preco = Number(estacionamento.precoPorHora);
 
-    const valorFinal =
-    valorCobrado != null
-    ? Number(valorCobrado): (!isNaN(preco) ? horas * preco: 0);
+    let valorFinal = !isNaN(preco) ? horas * preco: 0;
+
+    // Ó ADMIN PODE ALTERAR
+    if (req.usuario.role === "admin" && valorCobrado != null) {
+      valorFinal = Number(valorCobrado);
+    }
 
     sessao.horaSaida = horaSaida;
     sessao.valorCobrado = valorFinal;
     sessao.status = "finalizado";
-    sessao.operadorId = req.usuarioId;
+    sessao.operadorId = req.usuario._id;
 
     await sessao.save();
 
@@ -192,7 +210,7 @@ export const registrarSaida = async (req, res) => {
     });
 
     await criarLog( {
-      usuarioId: req.usuarioId,
+      usuarioId: req.usuario._id,
       empresaId: req.empresaId,
       acao: "saida_carro",
       entidade: "sessao",
@@ -211,29 +229,6 @@ export const registrarSaida = async (req, res) => {
 };
 
 //*************LinkWa_parkflow*************
-// =>LISTAR HISTÓRICO
-//*****************************************
-
-export const listarHistorico = async(req, res)=> {
-  try {
-    const sessoes = await ParkingSession.find({
-      status: "finalizado",
-      empresaId: req.empresaId
-    }).sort({
-      horaEntrada: -1
-    })
-
-    res.json(sessoes)
-
-
-  }catch(erro) {
-    res.status(500).json({
-      success: false, message: "Erro ao buscar Histórico."
-    })
-  }
-}
-
-//*************LinkWa_parkflow*************
 // =>CONTAR CARROS ATIVOS
 //*****************************************
 export const listarCarrosAtivos = async (req, res) => {
@@ -249,12 +244,16 @@ export const listarCarrosAtivos = async (req, res) => {
       status: "ativo"
     };
 
-    //  filtro por placa (LIKE)
     if (placa) {
+      const placaFormatada = placa
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+
       filtro.placa = {
-        $regex: placa,
+        $regex: placaFormatada,
         $options: "i"
-      }; // case insensitive
+      };
     }
 
     //  filtro por estacionamento
@@ -410,7 +409,7 @@ export const dashboard = async (req, res) => {
   try {
     const empresaId = req.empresaId;
 
-    // 🔥 carros ativos REAIS
+    //  carros ativos REAIS
     const carrosAtivos = await ParkingSession.countDocuments({
       empresaId,
       status: "ativo"
@@ -599,4 +598,167 @@ export const entradasPorHora = async (req, res) => {
       message: "Erro ao calcular entradas por hora: " + erro.message
     });
   }
+};
+
+
+/* =========================
+FILTRO BASE
+========================= */
+const montarFiltroHistorico = (req, query) => {
+let filtro = {
+  status: "finalizado",
+  empresaId: req.empresaId
+};
+
+// ROLE
+if (req.usuario.role === "operador") {
+  filtro.estacionamentoId = req.usuario.estacionamentoId;
+}
+
+if (req.usuario.role === "admin" && query.estacionamentoId) {
+  filtro.estacionamentoId = query.estacionamentoId;
+}
+
+// PERIODO
+const agora = new Date();
+
+if (query.periodo === "hoje") {
+  const inicio = new Date();
+  inicio.setHours(0, 0, 0, 0);
+  filtro.horaSaida = {
+    $gte: inicio
+  };
+}
+
+if (query.periodo === "semana") {
+  const inicio = new Date();
+  inicio.setDate(agora.getDate() - 7);
+  filtro.horaSaida = {
+    $gte: inicio
+  };
+}
+
+if (query.periodo === "mes") {
+  const inicio = new Date();
+  inicio.setMonth(agora.getMonth() - 1);
+  filtro.horaSaida = {
+    $gte: inicio
+  };
+}
+
+return filtro;
+};
+
+/* =========================
+   LISTAR HISTÓRICO
+========================= */
+export const listarHistorico = async (req, res) => {
+try {
+const pagina = Number(req.query.pagina) || 1;
+const limite = 20;
+const skip = (pagina - 1) * limite;
+
+const filtro = montarFiltroHistorico(req, req.query);
+
+const sessoes = await ParkingSession.find(filtro)
+.sort({
+horaSaida: -1
+})
+.skip(skip)
+.limit(limite)
+.populate("estacionamentoId", "nome")
+.populate("operadorId", "nome");
+
+const totalAgg = await ParkingSession.aggregate([{
+$match: filtro
+},
+{
+$group: {
+_id: null,
+total: {
+$sum: "$valorCobrado"
+}
+}
+}]);
+
+const totalFaturado = totalAgg[0]?.total || 0;
+
+const total = await ParkingSession.countDocuments(filtro);
+
+res.json({
+success: true,
+pagina,
+total,
+totalPaginas: Math.ceil(total / limite),
+totalFaturado,
+dados: sessoes
+});
+
+} catch (erro) {
+res.status(500).json({
+success: false,
+message: "Erro ao buscar histórico: " + erro.message
+});
+}
+};
+
+/* =========================
+   EXPORT PDF
+========================= */
+export const exportarHistoricoPDF = async (req, res) => {
+try {
+const filtro = montarFiltroHistorico(req, req.query);
+
+const sessoes = await ParkingSession.find(filtro)
+.sort({
+horaSaida: -1
+})
+.populate("estacionamentoId", "nome")
+.populate("operadorId", "nome");
+
+const doc = new PDFDocument();
+
+res.setHeader("Content-Type", "application/pdf");
+res.setHeader("Content-Disposition", "attachment; filename=historico.pdf");
+
+doc.pipe(res);
+
+doc.fontSize(18).text("Histórico de Sessões", {
+align: "center"
+});
+doc.moveDown();
+
+let total = 0;
+
+sessoes.forEach((s, i) => {
+total += s.valorCobrado || 0;
+
+doc.fontSize(12).text(
+`${i + 1}. Placa: ${s.placa} | Valor: ${s.valorCobrado} MT`
+);
+
+doc.fontSize(10).text(
+`Entrada: ${new Date(s.horaEntrada).toLocaleString()} | Saída: ${new Date(s.horaSaida).toLocaleString()}`
+);
+
+doc.fontSize(10).text(
+`Estacionamento: ${s.estacionamentoId?.nome || "N/A"} | Operador: ${s.operadorId?.nome || "N/A"}`
+);
+
+doc.moveDown();
+});
+
+doc.moveDown();
+doc.fontSize(14).text(`Total faturado: ${total} MT`, {
+align: "right"
+});
+
+doc.end();
+
+} catch (erro) {
+res.status(500).json({
+success: false,
+message: "Erro ao exportar PDF: " + erro.message
+});
+}
 };

@@ -13,10 +13,12 @@ const sessaoSchema = new mongoose.Schema({
     ref: "Parking",
     required: true
   },
-operadorId: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "User"
-},
+
+  operadorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
+
   empresaId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
@@ -35,18 +37,26 @@ operadorId: {
   valorCobrado: {
     type: Number,
     default: 0
-    },
+  },
 
-    status: {
-      type: String,
-      enum: ["ativo", "finalizado"],
+  status: {
+    type: String,
+    enum: ["ativo", "finalizado"],
     default: "ativo"
-    },
+  },
 
-    criadoEm: {
-      type: Date,
+  criadoEm: {
+    type: Date,
     default: Date.now
-    }
-  });
+  }
+});
 
-  export default mongoose.model("ParkingSession", sessaoSchema);
+/* =========================================
+   ÍNDICES (CORRETO LOCAL)
+========================================= */
+
+sessaoSchema.index({ empresaId: 1, status: 1 });
+sessaoSchema.index({ estacionamentoId: 1, status: 1 });
+sessaoSchema.index({ placa: 1, status: 1 });
+
+export default mongoose.model("ParkingSession", sessaoSchema);

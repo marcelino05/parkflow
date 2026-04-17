@@ -9,7 +9,8 @@ import {
   receitaTotal,
   dashboard,
   receitaPorPeriodo,
-  entradasPorHora
+  entradasPorHora,
+  exportarHistoricoPDF
 } from "../controllers/sessionController.js";
 
 import {
@@ -45,6 +46,10 @@ router.get("/entradas-por-hora", permitir("admin"), entradasPorHora);
 
 // DADOS GERAIS
 router.get("/historico", permitir("admin", "operador"), listarHistorico);
+
+// EXPORT PDF (ADMIN + OPERADOR)
+router.get("/historico/pdf", permitir("admin", "operador"), exportarHistoricoPDF)
+
 router.get("/ativos", permitir("admin", "operador"), listarCarrosAtivos);
 router.get("/vagas-disponiveis", permitir("admin", "operador"), vagasDisponiveis);
 
