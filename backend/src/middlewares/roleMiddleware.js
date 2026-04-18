@@ -2,7 +2,6 @@ import User from "../models/User.js";
 
 export const verificarAdmin = async (req, res, next) => {
   try {
-console.log("req.usuarioId:", req.usuarioId);
     if (!req.usuarioId) {
       return res.status(401).json({
         success: false,

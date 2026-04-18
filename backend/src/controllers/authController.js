@@ -178,13 +178,19 @@ export const esqueciSenha = async (req, res, next) => {
     } = req.body;
 
     if (!email || typeof email !== "string") {
-      return erroResposta(res, 400, "Email é obrigatório.");
+      return res.status(400).json({
+        success: false,
+        message: "Email obrigatório"
+      })
     }
 
     const emailLimpo = email.toLowerCase().trim();
 
     if (!validator.isEmail(emailLimpo)) {
-      return erroResposta(res, 400, "Email inválido.");
+      return res.status(400).json({
+        success: false,
+        message: "Email inválido"
+      })
     }
 
     const usuario = await User.findOne({
@@ -198,6 +204,7 @@ export const esqueciSenha = async (req, res, next) => {
         message: "Se o email existir, enviaremos um link de recuperação."
       });
     }
+    console.log(usuario)
 
     // gerar token seguro
     const resetToken = crypto.randomBytes(32).toString("hex");
@@ -212,7 +219,7 @@ export const esqueciSenha = async (req, res, next) => {
 
     await usuario.save();
 
-    const link = `http://localhost:7700/parkflow/src/auth/reset-password.html?token=${resetToken}`;
+    const link = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
 
     await enviarEmail(
       usuario.email,
@@ -293,6 +300,15 @@ export const redefinirSenha = async (req, res, next) => {
       return erroResposta(res, 400, "Senha muito curta.");
     }
 
+    const regex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+
+    if (!regex.test(senha)) {
+      return res.status(400).json({
+        success: false,
+        message: "A senha deve conter pelo menos uma letra e um número"
+      });
+    }
+    
     const tokenHash = crypto
     .createHash("sha256")
     .update(token)
