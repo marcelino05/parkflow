@@ -70,7 +70,7 @@ async function listar() {
     const res = await request("/parking");
     
     if (!res.success) {
-      throw new Error(res.message);
+      throw new Error(res?.message);
     }
     
     const lista = res?.estacionamentos || [];

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParkFlow - Operadores</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../dashboard/dashboard.css">
+  <link rel="stylesheet" href="../utils/global.css">
+  <link rel="stylesheet" href="../utils/toast.css">
+  <link rel="stylesheet" href="./operator.css">
+</head>
+
+<body>
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <h2 class="logo">Park<b>Flow</b></h2>
+    
+    <nav>
+      <a href="../dashboard/dashboard.html" class="only-admin">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="../session/sessao.html" class="only-admin">
+        <i class="bi bi-car-front"></i> Sessões
+      </a>
+      <a href="../parking/parking.html" id="menuParking" class="only-admin">
+        <i class="bi bi-p-square"></i> Estacionamento
+      </a>
+      <a href="../operators/operator.html" class="only-admin">
+        <i class="bi bi-person"></i> Operadores
+      </a>
+      <a href="../company/companyInfo.html" class="only-admin">
+        <i class="bi bi-buildings"></i> Empresa
+      </a>
+      <a href="../histories/history.html" class="only-admin">
+        <i class="bi bi-clock-history"></i> Histórico
+      </a>
+      <a href="../settings/setting.html" class="only-admin">
+        <i class="bi bi-gear"></i> Configurações
+      </a>
+    </nav>
+  </aside>
+  
+  <!-- MAIN -->
+  <div class="layout">
+    
+    <!-- HEADER -->
+    <header class="header">
+      <div class="left">
+        <span id="btn-menu"><i class="bi bi-list"></i></span>
+        <h3>Operadores</h3>
+        <h4 id="companyName"></h4>
+      </div>
+      
+      <div class="right">
+        <i class="bi bi-bell"></i>
+        <i class="bi bi-moon" id="themeBtn"></i>
+        <a href="#" class="btn-primary">Plano</a>
+      </div>
+    </header>
+    
+    <!-- CONTENT -->
+    <main class="main">
+      
+      <!-- FORM -->
+      <section class="form-section">
+        
+        <h2>Cadastrar Operador</h2>
+        
+        <form id="formOperador">
+          
+          <div class="input-box">
+            <i class="bi bi-person"></i>
+            <input type="text" id="nome" placeholder="Nome">
+          </div>
+          
+          <div class="input-box">
+            <i class="bi bi-telephone"></i>
+            <input type="text" id="telefone" placeholder="Telefone">
+          </div>
+          
+          <div class="input-box">
+            <i class="bi bi-envelope"></i>
+            <input type="email" id="email" placeholder="Email">
+          </div>
+          
+          <div class="input-box">
+            <i class="bi bi-lock"></i>
+            <input type="password" id="senha" placeholder="Senha">
+          </div>
+          
+          <div class="input-box">
+            <i class="bi bi-building"></i>
+            <select id="estacionamentoId">
+              <option value="">Selecionar Estacionamento</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn-primary">Criar Operador</button>
+          
+        </form>
+        
+      </section>
+      
+      <!-- TABELA -->
+      <section class="table-section">
+        
+        <h2>Lista de Operadores</h2>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Telefone</th>
+              <th>Email</th>
+              <th>Estacionamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          
+          <tbody id="tabelaOperadores"></tbody>
+        </table>
+        
+      </section>
+      
+      <!-- MODAL EDIT -->
+      <div class="modal" id="modalOperador">
+        <div class="modal-content">
+          
+          <h2>Editar Operador</h2>
+          
+          <form id="formEditOperador">
+            
+            <input type="hidden" id="editId">
+            
+            <div class="input-box">
+              <i class="bi bi-person"></i>
+              <input type="text" id="editNome" placeholder="Nome">
+            </div>
+            
+            <div class="input-box">
+              <i class="bi bi-telephone"></i>
+              <input type="text" id="editTelefone" placeholder="Telefone">
+            </div>
+            
+            <div class="input-box">
+              <i class="bi bi-envelope"></i>
+              <input type="email" id="editEmail" placeholder="Email">
+            </div>
+            
+            <div class="input-box">
+              <i class="bi bi-lock"></i>
+              <input type="password" id="editSenha" placeholder="Nova senha (opcional)">
+            </div>
+
+            <!-- ✅ CORREÇÃO AQUI -->
+            <div class="input-box">
+              <i class="bi bi-building"></i>
+              <select id="editEstacionamentoId">
+                <option value="">Selecionar Estacionamento</option>
+              </select>
+            </div>
+            
+            <div class="modal-actions">
+              <button type="button" id="closeModal">Cancelar</button>
+              <button type="submit" class="btn-primary">Salvar</button>
+            </div>
+            
+          </form>
+          
+        </div>
+      </div>
+      
+    </main>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../utils/global.js" defer></script>
+  <script type="module" src="./operator.js"></script>
+
+</body>
+</html>

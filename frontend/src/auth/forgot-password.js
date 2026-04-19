@@ -16,15 +16,14 @@ window.enviar = async function() {
     
     const res = await request("/auth/esqueci-senha", "POST", { email });
     
-    if (!res || res.success === false) {
-      updateToast(toast, res?.message || "Erro ao enviar email", "erro");
-      return;
+    if (!res.success) {
+      throw new Error(res?.message)
     }
-    
-    updateToast(toast, "Verifica teu email", "sucesso");
-    
+
+    updateToast(toast, res?.message|| "Verifica teu email", "sucesso", 5000)
+
   } catch (err) {
-    updateToast(toast, "Erro inesperado no envio", "erro");
+    updateToast(toast, err.message || "Erro inesperado no envio", "erro");
     console.error(err);
   }
 };

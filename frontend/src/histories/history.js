@@ -44,7 +44,7 @@ async function carregarEstacionamentos() {
     // ⚠AJUSTA AQUI se tua rota for diferente
     const res = await request("/parking");
     
-    if (!res.success) throw new Error("Erro ao carregar estacionamentos");
+    if (!res.success) throw new Error(res.message || "Erro ao carregar estacionamentos");
     
     selectEstacionamento.innerHTML = "";
     
@@ -92,7 +92,7 @@ async function loadHistorico() {
     
     const res = await request(url);
     
-    if (!res.success) throw new Error("Erro ao carregar histórico");
+    if (!res.success) throw new Error(res.message || "Erro ao carregar histórico");
     
     historico = res.dados || [];
     
@@ -215,7 +215,10 @@ function renderHistorico(data) {
 
       <div class="finance-block">
         <span class="valor">${item.valorCobrado || 0} MT</span>
-        <small>${item.operadorId?.nome || "-"}</small>
+        <small>
+        Operador: 
+${item.operadorId?.nome || "-"}
+</small>
       </div>
     `;
     

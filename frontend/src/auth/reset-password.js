@@ -37,6 +37,10 @@ async function resetPassword(token, novaSenha) {
     
     const data = await response.json();
     
+   if(!data.success){
+     throw new Error(data.message)
+   }
+   
     return {
       status: response.status,
       ...data

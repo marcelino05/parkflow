@@ -61,9 +61,9 @@ async function carregarDashboard() {
   try {
     const res = await request("/session/dashboard");
 
-    if (!res.success) throw new Error(res.message);
+    if (!res.success) throw new Error(res?.message);
 
-    const data = res.dados; // ✅ CORRETO
+    const data = res.dados; 
 
     document.getElementById("receita").innerText = `${data.receitaHoje} MZN`;
     document.getElementById("ativos").innerText = data.carrosAtivos;
@@ -99,7 +99,7 @@ async function carregarGraficos() {
     }
 
     /* ===== ENTRADAS POR HORA ===== */
-    const entradas = await request("/session/entradas-por-hora"); // ✅ corrigido rota
+    const entradas = await request("/session/entradas-por-hora"); 
 
     if (entradas.success && entradas.dados) {
 
@@ -131,7 +131,9 @@ async function getCompanyName() {
   try {
     const res = await request("/company");
 
-    if (!res.success) return;
+    if (!res.success) {
+      throw new Error(res?.message)
+    };
 
     document.getElementById("companyName").textContent =
       res.empresa?.nome || "Empresa";

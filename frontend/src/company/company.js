@@ -57,12 +57,11 @@ const sendCompanyToAPI = async (payload) => {
     const res = await request("/company", "POST", payload);
     
     if (!res.success) {
-      return updateToast(toastId, res.message, "erro");
+      return updateToast(toastId, res?.message, "erro");
     }
     
     updateToast(toastId, "Empresa criada com sucesso", "sucesso");
     
-    // 🔥 se backend devolver token novo
     if (res.token) {
       setSession(res.token, { role: "admin" });
     }

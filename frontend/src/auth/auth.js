@@ -48,12 +48,11 @@ const register = async () => {
     });
     
     if (!res.success) {
-      return updateToast(toast, res.message, "erro");
+      return updateToast(toast, res?.message, "erro");
     }
     
     updateToast(toast, "Cadastrado com sucesso", "sucesso");
     
-    // 🔥 salvar sessão
     if (res.token) {
       setSession(res.token, { role: "admin" });
       
@@ -89,11 +88,11 @@ const login = async () => {
     });
     
     if (!res.success) {
-      return updateToast(toast, res.message, "erro");
+      return updateToast(toast, res?.message, "erro");
     }
     
     const user = res.usuario;
-    // 🔥 salvar sessão
+
     setSession(res.token, user);
     
     updateToast(toast, "Login realizado com sucesso!", "sucesso");

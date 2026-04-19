@@ -39,7 +39,7 @@ async function getParkings() {
     const data = await request("/parking");
 
     if (!data.success) {
-      throw new Error("Erro ao carregar estacionamentos");
+      throw new Error(data?.message || "Erro ao carregar estacionamentos");
     }
 
     const park = data.estacionamentos || [];
@@ -100,7 +100,7 @@ async function loadStats(estacionamentoId = null) {
     const data = await request(url);
 
     if (!data.success) {
-      throw new Error("Erro ao carregar dados");
+      throw new Error(data?.message || "Erro ao carregar dados");
     }
 
     const stats = data.dados || data;
@@ -188,7 +188,7 @@ async function loadAtivos(estacionamentoId = null) {
     const res = await request(url);
 
     if (!res.success) {
-      throw new Error("Erro ao carregar sessões");
+      throw new Error( res?.message || "Erro ao carregar sessões");
     }
 
     renderSessions(res.data || []);
@@ -236,7 +236,7 @@ if (btnEntrada) {
       });
 
       if (!res.success) {
-        throw new Error("Erro ao registrar entrada. Verifique a placa");
+        throw new Error(res?.message || "Erro ao registrar entrada. Verifique a placa");
       }
 
       placaInput.value = "";
@@ -276,7 +276,7 @@ if (listEl) {
       const res = await request(`/session/saida`, "POST", { sessaoId });
 
       if (!res.success) {
-        throw new Error("Erro ao finalizar sessão");
+        throw new Error( res?.message || "Erro ao finalizar sessão");
       }
 
       await loadStats(estacionamentoAtual);
@@ -319,7 +319,7 @@ async function pesquisarPlaca(termo) {
     const res = await request(url);
 
     if (!res.success) {
-      throw new Error("Erro ao pesquisar");
+      throw new Error(res?.message || "Erro ao pesquisar");
     }
 
     renderSessions(res.data || []);
